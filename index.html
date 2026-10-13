@@ -1013,24 +1013,24 @@
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     redirect: "follow"
                 });
-                
+        
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
 
                 if (json.status === "success" && json.users) {
-                    listUsers = json.users; // Pembaruan murni dari Cloud
+                    listUsers = json.users; 
                     renderUsersTable();
                     alert("✅ Berhasil disinkronkan ke Database Cloud Google Sheets!");
                 } else {
-                    alert("Gagal sinkronisasi cloud: " + (json.message || "Kesalahan"));
+                    alert("Gagal sinkronisasi cloud: " + (json.message || "Kesalahan pada server"));
                 }
             } catch(e) {
                 console.error("Gagal sinkronisasi cloud:", e);
-                alert("❌ Gagal terhubung ke Cloud Database.");
+                alert("❌ Gagal terhubung ke Cloud Database. Periksa kembali koneksi internet Anda.");
             }
         }
-
-        async function simpanAtauTambahUser() {
+        
+         async function simpanAtauTambahUser() {
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim();
             const password = document.getElementById('new-user-password').value.trim();
