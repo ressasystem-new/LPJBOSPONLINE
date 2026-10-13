@@ -977,7 +977,7 @@
 
         async function fetchUsersFromCloud() {
             if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
-                alert("URL Cloud Database belum diatur!");
+                console.warn("URL Cloud Database belum diatur.");
                 return;
             }
             try {
@@ -985,17 +985,16 @@
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
                 if (json && json.status === "success" && Array.isArray(json.users)) {
-                    listUsers = json.users; // Full Cloud Data
+                    listUsers = json.users; 
                     renderUsersTable();
                 } else {
-                    console.error("Gagal mengambil data akun dari cloud:", json.message);
+                    console.error("Gagal memuat akun dari cloud:", json.message);
                 }
             } catch (e) {
-                console.error("Koneksi cloud gagal:", e);
-                alert("❌ Gagal terhubung ke Cloud Database untuk memuat akun pengguna.");
+                console.error("Kesalahan koneksi saat mengambil data cloud:", e);
             }
         }
-
+                
         async function syncUsersToCloud(actionType, userObj, targetUsername = "") {
             if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
                 alert("URL Cloud Database belum diatur!");
