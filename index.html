@@ -230,7 +230,6 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 12px;
         }
         .user-profile {
             position: relative;
@@ -476,7 +475,6 @@
     <!-- MAIN APP WRAPPER -->
     <div class="app-wrapper" id="app-wrapper">
         <div class="topbar">
-            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;" onclick="handleLogout()">🚪 Keluar</button>
             <div class="user-profile" onclick="toggleProfileMenu(event)">
                 <div class="avatar" id="display-avatar">N</div>
                 <span id="display-user-name">Nama Pengguna</span>
@@ -489,6 +487,7 @@
                         <span id="dropdown-user-role" style="font-size: 0.75rem; color: var(--btn-bg); font-weight: bold; margin-top: 2px; display: block;">Admin</span>
                     </div>
                     <a href="#" id="dropdown-settings-link" onclick="switchTab('tab-settings');">⚙️ Pengaturan</a>
+                    <a href="#" onclick="handleLogout()" style="color: #ef4444; border-top: 1px solid var(--border-light);">🚪 Keluar (Logout)</a>
                 </div>
             </div>
         </div>
@@ -796,14 +795,18 @@
                     <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 20px 0;">
 
                     <div>
-                        <h4>Tambah Akun Pengguna Baru</h4>
+                        <h4>Tambah & Kelola Akun Pengguna</h4>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Username Pengguna</label>
-                                <input type="text" id="new-user-name" placeholder="Contoh: user_biasa">
+                                <label>Nama Pengguna / Display Name</label>
+                                <input type="text" id="new-user-fullname" placeholder="Contoh: Budi Operator">
                             </div>
                             <div class="form-group">
-                                <label>Password Pengguna</label>
+                                <label>Username (Login)</label>
+                                <input type="text" id="new-user-name" placeholder="Contoh: operator1">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
                                 <input type="password" id="new-user-pass" placeholder="Password akun">
                             </div>
                         </div>
@@ -813,9 +816,10 @@
                             <table id="tabel-list-users">
                                 <thead>
                                     <tr>
+                                        <th>Nama Lengkap</th>
                                         <th>Username</th>
                                         <th>Peran (Role)</th>
-                                        <th style="text-align: center; width: 120px;">Aksi</th>
+                                        <th style="text-align: center; width: 150px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -962,6 +966,32 @@
         </div>
     </div>
 
+    <!-- MODAL EDIT USER -->
+    <div id="edit-user-modal" class="modal">
+        <div class="modal-content" style="max-width: 450px; height: auto; padding: 24px;">
+            <div class="modal-header" style="background: none; border: none; padding: 0 0 16px 0;">
+                <h4>Edit Akun Pengguna</h4>
+                <button class="close-btn" onclick="closeEditUserModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="background: none; overflow: visible;">
+                <input type="hidden" id="edit-user-idx">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="edit-user-fullname">
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="edit-user-username">
+                </div>
+                <div class="form-group">
+                    <label>Password Baru <span style="font-weight: normal; font-size: 0.75rem;">(Kosongkan jika tidak diubah)</span></label>
+                    <input type="password" id="edit-user-password" placeholder="Password baru">
+                </div>
+                <button class="btn btn-success" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="saveEditedUser()">💾 Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
     <div id="preview-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -992,12 +1022,12 @@
         let daftarLPJ = [];
         let processedBKUForForm = [];
 
-        // Data Akun Pengguna & Admin Default
+        // Data Autentikasi Default
         let authData = {
             adminUser: "admin",
             adminPass: "Manado01",
             users: [
-                { username: "admin", password: "Manado01", role: "Admin" }
+                { fullname: "Administrator", username: "admin", password: "Manado01", role: "Admin" }
             ]
         };
 
@@ -1011,7 +1041,7 @@
             "Konsumsi": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi"]
         };
 
-        // --- SISTEM LOGIN & OTENTIKASI ---
+        // --- SISTEM LOGIN & SESI BERKELANJUTAN ---
         function handleLogin(e) {
             e.preventDefault();
             const uInput = document.getElementById('login-user').value.trim();
@@ -1021,6 +1051,7 @@
             let found = authData.users.find(u => u.username === uInput && u.password === pInput);
             if (found) {
                 currentUser = found;
+                localStorage.setItem('lpj_bosp_current_session_v3', JSON.stringify(currentUser));
                 errDiv.style.display = 'none';
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-wrapper').classList.add('active');
@@ -1033,10 +1064,12 @@
 
         function handleLogout() {
             currentUser = null;
+            localStorage.removeItem('lpj_bosp_current_session_v3');
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
             document.getElementById('app-wrapper').classList.remove('active');
             document.getElementById('login-container').style.display = 'flex';
+            document.getElementById('profile-dropdown').classList.remove('active');
         }
 
         function applyUserPermissions() {
@@ -1052,7 +1085,6 @@
                 if(settingsBtn) settingsBtn.style.display = 'none';
                 if(adminCard) adminCard.style.display = 'none';
                 if(roleLabel) roleLabel.innerText = 'Pengguna / User';
-                // Jika sedang di tab settings saat login sebagai user, alihkan ke tab data
                 if(document.getElementById('tab-settings').classList.contains('active')) {
                     switchTab('tab-data');
                 }
@@ -1078,18 +1110,20 @@
         }
 
         function tambahAkunPengguna() {
+            const fullname = document.getElementById('new-user-fullname').value.trim();
             const uname = document.getElementById('new-user-name').value.trim();
             const upass = document.getElementById('new-user-pass').value.trim();
 
-            if (!uname || !upass) { alert("Username dan Password pengguna wajib diisi!"); return; }
+            if (!fullname || !uname || !upass) { alert("Nama lengkap, username, dan password wajib diisi!"); return; }
             if (authData.users.some(u => u.username === uname)) { alert("Username sudah terdaftar!"); return; }
 
-            authData.users.push({ username: uname, password: upass, role: 'Pengguna' });
+            authData.users.push({ fullname: fullname, username: uname, password: upass, role: 'Pengguna' });
+            document.getElementById('new-user-fullname').value = '';
             document.getElementById('new-user-name').value = '';
             document.getElementById('new-user-pass').value = '';
             saveAppData();
             renderUserTable();
-            showSuccessModal(`Akun pengguna ${uname} berhasil ditambahkan!`);
+            showSuccessModal(`Akun pengguna ${fullname} berhasil ditambahkan!`);
         }
 
         function renderUserTable() {
@@ -1099,13 +1133,49 @@
 
             authData.users.forEach((usr, idx) => {
                 tbody.innerHTML += `<tr>
-                    <td><b>${usr.username}</b></td>
+                    <td><b>${usr.fullname || usr.username}</b></td>
+                    <td>${usr.username}</td>
                     <td><span class="bukti-badge">${usr.role}</span></td>
                     <td style="text-align:center;">
-                        ${usr.role !== 'Admin' ? `<button onclick="hapusUser(${idx})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600;">Hapus</button>` : '<span style="color:var(--text-muted); font-size:0.75rem;">Utama</span>'}
+                        <button onclick="openEditUserModal(${idx})" class="btn btn-outline" style="padding:2px 8px; font-size:0.75rem;">Edit</button>
+                        ${usr.role !== 'Admin' ? `<button onclick="hapusUser(${idx})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600; margin-left:8px;">Hapus</button>` : ''}
                     </td>
                 </tr>`;
             });
+        }
+
+        function openEditUserModal(idx) {
+            const usr = authData.users[idx];
+            document.getElementById('edit-user-idx').value = idx;
+            document.getElementById('edit-user-fullname').value = usr.fullname || '';
+            document.getElementById('edit-user-username').value = usr.username || '';
+            document.getElementById('edit-user-password').value = '';
+            document.getElementById('edit-user-modal').classList.add('active');
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('edit-user-modal').classList.remove('active');
+        }
+
+        function saveEditedUser() {
+            const idx = parseInt(document.getElementById('edit-user-idx').value);
+            const fullname = document.getElementById('edit-user-fullname').value.trim();
+            const username = document.getElementById('edit-user-username').value.trim();
+            const password = document.getElementById('edit-user-password').value.trim();
+
+            if (!fullname || !username) { alert("Nama lengkap dan username tidak boleh kosong!"); return; }
+
+            let usr = authData.users[idx];
+            usr.fullname = fullname;
+            usr.username = username;
+            if (password) {
+                usr.password = password;
+            }
+
+            saveAppData();
+            renderUserTable();
+            closeEditUserModal();
+            showSuccessModal("Data pengguna berhasil diperbarui!");
         }
 
         function hapusUser(idx) {
@@ -1114,7 +1184,7 @@
             renderUserTable();
         }
 
-        // --- SISTEM PENYIMPANAN LOCALSTORAGE ---
+        // --- SISTEM PENYIMPANAN ONLINE & LOCALSTORAGE ---
         function saveAppData() {
             const appData = {
                 authData: authData,
@@ -1153,14 +1223,14 @@
                 bgImage: document.body.style.backgroundImage || ''
             };
             try {
-                localStorage.setItem('lpj_bosp_online_data_v3', JSON.stringify(appData));
+                localStorage.setItem('lpj_bosp_online_data_v4', JSON.stringify(appData));
             } catch (e) {
                 console.error("Gagal menyimpan ke localStorage:", e);
             }
         }
 
         function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_online_data_v3');
+            const saved = localStorage.getItem('lpj_bosp_online_data_v4');
             if (!saved) return;
             try {
                 const appData = JSON.parse(saved);
@@ -1242,6 +1312,20 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
+            
+            // Cek sesi aktif saat refresh browser
+            const activeSession = localStorage.getItem('lpj_bosp_current_session_v3');
+            if (activeSession) {
+                try {
+                    currentUser = JSON.parse(activeSession);
+                    document.getElementById('login-container').style.display = 'none';
+                    document.getElementById('app-wrapper').classList.add('active');
+                    applyUserPermissions();
+                    updateProfile();
+                } catch(e) {
+                    console.error("Sesi tidak valid:", e);
+                }
+            }
             renderUserTable();
         });
 
@@ -1259,7 +1343,7 @@
         });
 
         function updateProfile() {
-            const userName = document.getElementById('setting-user-name').value || (currentUser ? currentUser.username : 'Nama Pengguna');
+            const userName = document.getElementById('setting-user-name').value || (currentUser ? currentUser.fullname || currentUser.username : 'Nama Pengguna');
             document.getElementById('display-user-name').innerText = userName;
             document.getElementById('dropdown-user-name').innerText = userName;
             document.getElementById('display-avatar').innerText = userName.charAt(0).toUpperCase();
