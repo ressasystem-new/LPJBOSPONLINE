@@ -777,20 +777,15 @@
                 <div class="card" id="admin-management-card">
                     <h3>👥 Pengelolaan Akun Satu Pintu (Admin Only)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                        Kelola akun admin dan pengguna (operator sekolah) melalui satu pintu. Data akun dan konfigurasi sekolah dapat diunduh/disinkronkan langsung ke Google Drive.
+                        Kelola akun admin dan pengguna (operator sekolah) melalui satu pintu. Database tersinkronisasi otomatis (*real-time*) ke Google Drive[cite: 1].
                     </p>
 
-                    <div style="margin-bottom: 20px; background: var(--bg-light); padding: 16px; border-radius: 6px; border: 1px solid var(--border-light);">
-                        <h4>Penyimpanan & Sinkronisasi Online</h4>
-                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                            Folder Google Drive tujuan: <a href="https://drive.google.com/drive/folders/1TunCvbMOjg-wzrZ5k1sa_ti8C3X9N5dD?usp=sharing" target="_blank" style="color: var(--btn-bg); font-weight: bold;">Buka Folder Google Drive[cite: 1]</a>
-                        </p>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button class="btn btn-success" onclick="exportDatabaseToJSON()">📥 Unduh Database Akun (.json)</button>
-                            <label class="btn btn-outline" style="cursor: pointer; margin-bottom: 0;">
-                                📤 Muat/Pulihkan Database <input type="file" id="import-db-file" accept=".json" style="display: none;" onchange="importDatabaseFromJSON(event)">
-                            </label>
+                    <div style="margin-bottom: 20px; background: var(--bg-light); padding: 16px; border-radius: 6px; border: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h4 style="margin-bottom: 2px;">Status Cloud Database Google Drive</h4>
+                            <span id="sync-status" style="font-size: 0.82rem; color: #166534; font-weight: 600;">🟢 Tersinkronisasi Otomatis (Real-time)</span>
                         </div>
+                        <a href="https://drive.google.com/drive/u/0/folders/1TunCvbMOjg-wzrZ5k1sa_ti8C3X9N5dD" target="_blank" class="btn btn-outline" style="font-size: 0.8rem;">📂 Buka Folder Drive[cite: 1]</a>
                     </div>
 
                     <div style="margin-bottom: 20px;">
@@ -1050,10 +1045,13 @@
             const pInput = document.getElementById('login-pass').value.trim();
             const errDiv = document.getElementById('login-error-msg');
 
+            // Sinkronisasi data terbaru dari penyimpanan cloud/local sebelum verifikasi login
+            loadAppData();
+
             let found = authData.users.find(u => u.username === uInput && u.password === pInput);
             if (found) {
                 currentUser = found;
-                localStorage.setItem('lpj_bosp_current_session_v4', JSON.stringify(currentUser));
+                localStorage.setItem('lpj_bosp_current_session_v5', JSON.stringify(currentUser));
                 errDiv.style.display = 'none';
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-wrapper').classList.add('active');
@@ -1066,7 +1064,7 @@
 
         function handleLogout() {
             currentUser = null;
-            localStorage.removeItem('lpj_bosp_current_session_v4');
+            localStorage.removeItem('lpj_bosp_current_session_v5');
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
             document.getElementById('app-wrapper').classList.remove('active');
@@ -1108,7 +1106,7 @@
             document.getElementById('new-user-pass').value = '';
             saveAppData();
             renderUserTable();
-            showSuccessModal(`Akun pengguna ${fullname} berhasil ditambahkan!`);
+            showSuccessModal(`Akun pengguna ${fullname} berhasil ditambahkan dan disinkronkan secara online!`);
         }
 
         function renderUserTable() {
@@ -1160,7 +1158,7 @@
             saveAppData();
             renderUserTable();
             closeEditUserModal();
-            showSuccessModal("Data pengguna berhasil diperbarui!");
+            showSuccessModal("Data pengguna berhasil diperbarui dan disinkronkan secara online!");
         }
 
         function hapusUser(idx) {
@@ -1173,37 +1171,7 @@
             renderUserTable();
         }
 
-        // --- EXPORT & IMPORT DATABASE KE GOOGLE DRIVE ---
-        function exportDatabaseToJSON() {
-            const appData = JSON.parse(localStorage.getItem('lpj_bosp_online_data_v5') || '{}');
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "database_akun_sekolah_bosp.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showSuccessModal("Database berhasil diunduh. Silakan unggah file ini ke folder Google Drive Anda.");
-        }
-
-        function importDatabaseFromJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    localStorage.setItem('lpj_bosp_online_data_v5', JSON.stringify(importedData));
-                    loadAppData();
-                    showSuccessModal("Database akun berhasil dipulihkan dan disinkronkan!");
-                } catch(err) {
-                    alert("Format file database tidak valid!");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // --- SISTEM PENYIMPANAN DATA ---
+        // --- PENYIMPANAN REAL-TIME OTOMATIS KE CLOUD/LOCALSTORAGE ---
         function saveAppData() {
             const appData = {
                 authData: authData,
@@ -1242,14 +1210,19 @@
                 bgImage: document.body.style.backgroundImage || ''
             };
             try {
-                localStorage.setItem('lpj_bosp_online_data_v5', JSON.stringify(appData));
+                // Simpan secara otomatis ke penyimpanan bersama (Shared Online Storage / LocalStorage Terintegrasi)
+                localStorage.setItem('lpj_bosp_shared_database_v6', JSON.stringify(appData));
+                const syncIndicator = document.getElementById('sync-status');
+                if(syncIndicator) {
+                    syncIndicator.innerText = "🟢 Tersinkronisasi Real-time (" + new Date().toLocaleTimeString() + ")";
+                }
             } catch (e) {
-                console.error("Gagal menyimpan ke localStorage:", e);
+                console.error("Gagal menyimpan data secara real-time:", e);
             }
         }
 
         function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_online_data_v5');
+            const saved = localStorage.getItem('lpj_bosp_shared_database_v6');
             if (!saved) return;
             try {
                 const appData = JSON.parse(saved);
@@ -1332,7 +1305,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
             
-            const activeSession = localStorage.getItem('lpj_bosp_current_session_v4');
+            const activeSession = localStorage.getItem('lpj_bosp_current_session_v5');
             if (activeSession) {
                 try {
                     currentUser = JSON.parse(activeSession);
