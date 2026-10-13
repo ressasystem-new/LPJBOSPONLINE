@@ -972,25 +972,49 @@
             "Konsumsi": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi"]
         };
 
-        async function fetchUsersFromCloud() {
+async function fetchUsersFromCloud() {
             if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) return;
             try {
                 let res = await fetch(CLOUD_API_URL + "?action=getUsers", { method: "GET", redirect: "follow" });
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
-                if (json && json.users && Array.isArray(json.users) && json.users.length > 0) {
+                if (json && json.status === "success" && Array.isArray(json.users)) {
                     listUsers = json.users;
                     renderUsersTable();
                 }
             } catch (e) {
-                console.warn("Menggunakan daftar user lokal (Mode Offline aktif).");
+                console.error("Gagal mengambil data dari cloud:", e);
             }
         }
 
         async function addUserToCloud(newUserObj) {
-            listUsers.push(newUserObj);
-            renderUsersTable();
-            saveAppData();
+            if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
+                alert("URL Cloud belum diatur!");
+                return;
+            }
+
+            try {
+                let res = await fetch(CLOUD_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "addUser", user: newUserObj }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                });
+                
+                let textRes = await res.text();
+                let json = JSON.parse(textRes);
+
+                if (json.status === "success" && json.users) {
+                    listUsers = json.users;
+                    renderUsersTable();
+                    alert("✅ Akun berhasil disimpan ke Google Sheets Cloud dan langsung bisa digunakan di perangkat lain!");
+                } else {
+                    alert("Gagal menyimpan ke cloud: " + (json.message || "Kesalahan tidak diketahui"));
+                }
+            } catch(e) {
+                console.error(e);
+                alert("Terjadi kesalahan jaringan saat menyimpan akun ke cloud.");
+            }
+        }
 
             if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
                 alert("Akun berhasil ditambahkan secara lokal!");
