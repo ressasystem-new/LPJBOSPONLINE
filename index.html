@@ -1021,17 +1021,18 @@
         
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
-        
+
                 if (json.status === "success" && json.users) {
-                    listUsers = json.users;
+                    listUsers = json.users; // Memperbarui daftar akun dengan data murni dari Cloud
                     renderUsersTable();
-                    alert("✅ Akun berhasil disimpan secara permanen di Database Cloud Google Sheets dan dapat diakses dari perangkat manapun!");
+                    saveAppData();
+                    alert("✅ Akun berhasil disimpan secara permanen di Database Cloud Google Sheets dan langsung bisa digunakan di perangkat manapun!");
                 } else {
                     alert("Gagal menyimpan ke cloud: " + (json.message || "Kesalahan tidak diketahui"));
                 }
             } catch(e) {
-                console.error(e);
-                alert("❌ Gagal terhubung ke database cloud. Pastikan URL Apps Script aktif dan pengaturan akses disetel ke 'Anyone' (Siapa saja).");
+                console.error("Error koneksi cloud:", e);
+                alert("❌ Gagal terhubung ke Cloud Database. Periksa koneksi internet atau pastikan URL Apps Script sudah dideploy dengan benar.");
             }
         }
 
