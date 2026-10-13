@@ -775,30 +775,29 @@
 
             <div id="tab-settings" class="tab-content">
                 <div class="card" id="admin-management-card">
-                    <h3>👥 Manajemen Akun & Pengguna (Admin Only)</h3>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <h4>Ubah Kredensial Admin Utama</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Username Admin</label>
-                                <input type="text" id="setting-admin-username" value="admin">
-                            </div>
-                            <div class="form-group">
-                                <label>Password Baru Admin</label>
-                                <input type="password" id="setting-admin-password" placeholder="Kosongkan jika tidak diubah">
-                            </div>
+                    <h3>👥 Pengelolaan Akun Satu Pintu (Admin Only)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                        Kelola akun admin dan pengguna (operator sekolah) melalui satu pintu. Data akun dan konfigurasi sekolah dapat diunduh/disinkronkan langsung ke Google Drive.
+                    </p>
+
+                    <div style="margin-bottom: 20px; background: var(--bg-light); padding: 16px; border-radius: 6px; border: 1px solid var(--border-light);">
+                        <h4>Penyimpanan & Sinkronisasi Online</h4>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                            Folder Google Drive tujuan: <a href="https://drive.google.com/drive/folders/1TunCvbMOjg-wzrZ5k1sa_ti8C3X9N5dD?usp=sharing" target="_blank" style="color: var(--btn-bg); font-weight: bold;">Buka Folder Google Drive[cite: 1]</a>
+                        </p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-success" onclick="exportDatabaseToJSON()">📥 Unduh Database Akun (.json)</button>
+                            <label class="btn btn-outline" style="cursor: pointer; margin-bottom: 0;">
+                                📤 Muat/Pulihkan Database <input type="file" id="import-db-file" accept=".json" style="display: none;" onchange="importDatabaseFromJSON(event)">
+                            </label>
                         </div>
-                        <button class="btn btn-success" onclick="updateAdminCredentials()">💾 Simpan Kredensial Admin</button>
                     </div>
 
-                    <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 20px 0;">
-
-                    <div>
-                        <h4>Tambah & Kelola Akun Pengguna</h4>
+                    <div style="margin-bottom: 20px;">
+                        <h4>Tambah Akun Pengguna / Operator Baru</h4>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Nama Pengguna / Display Name</label>
+                                <label>Nama Lengkap</label>
                                 <input type="text" id="new-user-fullname" placeholder="Contoh: Budi Operator">
                             </div>
                             <div class="form-group">
@@ -811,15 +810,20 @@
                             </div>
                         </div>
                         <button class="btn" onclick="tambahAkunPengguna()">+ Tambah Akun Pengguna</button>
+                    </div>
 
-                        <div class="table-container" style="margin-top: 14px;">
+                    <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 20px 0;">
+
+                    <div>
+                        <h4>Daftar Akun Terdaftar (Admin & Pengguna)</h4>
+                        <div class="table-container" style="margin-top: 10px;">
                             <table id="tabel-list-users">
                                 <thead>
                                     <tr>
                                         <th>Nama Lengkap</th>
                                         <th>Username</th>
                                         <th>Peran (Role)</th>
-                                        <th style="text-align: center; width: 150px;">Aksi</th>
+                                        <th style="text-align: center; width: 160px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -1024,8 +1028,6 @@
 
         // Data Autentikasi Default
         let authData = {
-            adminUser: "admin",
-            adminPass: "Manado01",
             users: [
                 { fullname: "Administrator", username: "admin", password: "Manado01", role: "Admin" }
             ]
@@ -1051,7 +1053,7 @@
             let found = authData.users.find(u => u.username === uInput && u.password === pInput);
             if (found) {
                 currentUser = found;
-                localStorage.setItem('lpj_bosp_current_session_v3', JSON.stringify(currentUser));
+                localStorage.setItem('lpj_bosp_current_session_v4', JSON.stringify(currentUser));
                 errDiv.style.display = 'none';
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-wrapper').classList.add('active');
@@ -1064,7 +1066,7 @@
 
         function handleLogout() {
             currentUser = null;
-            localStorage.removeItem('lpj_bosp_current_session_v3');
+            localStorage.removeItem('lpj_bosp_current_session_v4');
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
             document.getElementById('app-wrapper').classList.remove('active');
@@ -1090,23 +1092,6 @@
                 }
             }
             renderUserTable();
-        }
-
-        function updateAdminCredentials() {
-            const newU = document.getElementById('setting-admin-username').value.trim();
-            const newP = document.getElementById('setting-admin-password').value.trim();
-
-            if (!newU) { alert("Username admin tidak boleh kosong!"); return; }
-
-            authData.adminUser = newU;
-            let adminObj = authData.users.find(u => u.role === 'Admin');
-            if (adminObj) {
-                adminObj.username = newU;
-                if (newP) adminObj.password = newP;
-            }
-            document.getElementById('setting-admin-password').value = '';
-            saveAppData();
-            showSuccessModal("Kredensial Admin berhasil diperbarui!");
         }
 
         function tambahAkunPengguna() {
@@ -1179,12 +1164,46 @@
         }
 
         function hapusUser(idx) {
+            if(authData.users[idx].role === 'Admin') {
+                alert("Akun Admin utama tidak dapat dihapus!");
+                return;
+            }
             authData.users.splice(idx, 1);
             saveAppData();
             renderUserTable();
         }
 
-        // --- SISTEM PENYIMPANAN ONLINE & LOCALSTORAGE ---
+        // --- EXPORT & IMPORT DATABASE KE GOOGLE DRIVE ---
+        function exportDatabaseToJSON() {
+            const appData = JSON.parse(localStorage.getItem('lpj_bosp_online_data_v5') || '{}');
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "database_akun_sekolah_bosp.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showSuccessModal("Database berhasil diunduh. Silakan unggah file ini ke folder Google Drive Anda.");
+        }
+
+        function importDatabaseFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    localStorage.setItem('lpj_bosp_online_data_v5', JSON.stringify(importedData));
+                    loadAppData();
+                    showSuccessModal("Database akun berhasil dipulihkan dan disinkronkan!");
+                } catch(err) {
+                    alert("Format file database tidak valid!");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- SISTEM PENYIMPANAN DATA ---
         function saveAppData() {
             const appData = {
                 authData: authData,
@@ -1223,14 +1242,14 @@
                 bgImage: document.body.style.backgroundImage || ''
             };
             try {
-                localStorage.setItem('lpj_bosp_online_data_v4', JSON.stringify(appData));
+                localStorage.setItem('lpj_bosp_online_data_v5', JSON.stringify(appData));
             } catch (e) {
                 console.error("Gagal menyimpan ke localStorage:", e);
             }
         }
 
         function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_online_data_v4');
+            const saved = localStorage.getItem('lpj_bosp_online_data_v5');
             if (!saved) return;
             try {
                 const appData = JSON.parse(saved);
@@ -1313,8 +1332,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
             
-            // Cek sesi aktif saat refresh browser
-            const activeSession = localStorage.getItem('lpj_bosp_current_session_v3');
+            const activeSession = localStorage.getItem('lpj_bosp_current_session_v4');
             if (activeSession) {
                 try {
                     currentUser = JSON.parse(activeSession);
