@@ -985,7 +985,21 @@
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
                 if (json && json.status === "success" && Array.isArray(json.users)) {
-                    listUsers = json.users; 
+                    let cloudUsers = json.users;
+            
+                    // Fallback pengaman: Pastikan akun default admin & user selalu ada jika sheet kosong
+                    let defaultUsers = [
+                        { name: "Administrator", username: "admin", password: "123", role: "admin" },
+                        { name: "Pengguna Sekolah", username: "user", password: "123", role: "user" }
+                    ];
+            
+                    defaultUsers.forEach(defU => {
+                        if (!cloudUsers.some(cu => cu.username.toLowerCase() === defU.username.toLowerCase())) {
+                            cloudUsers.push(defU);
+                        }
+                    });
+
+                    listUsers = cloudUsers; 
                     renderUsersTable();
                 } else {
                     console.error("Gagal memuat akun dari cloud:", json.message);
@@ -994,7 +1008,7 @@
                 console.error("Kesalahan koneksi saat mengambil data cloud:", e);
             }
         }
-                
+                   
         async function syncUsersToCloud(actionType, userObj, targetUsername = "") {
             if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
                 alert("URL Cloud Database belum diatur!");
@@ -1127,6 +1141,34 @@
             });
         }
 
+        async function prosesLogin() {
+            const u = document.getElementById('login-username').value.trim();
+            const p = document.getElementById('login-password').value.trim();
+            const errDiv = document.getElementById('login-error');
+            
+            if (!u || !p) {
+                errDiv.innerText = "Username dan password wajib diisi!";
+                return;
+            }
+
+            errDiv.innerText = "Sedang memverifikasi akun ke Cloud...";
+
+            // Wajib tarik data terbaru dari cloud sesaat sebelum mencocokkan kredensial login
+            await fetchUsersFromCloud();
+
+            const found = listUsers.find(item => item.username.toLowerCase() === u.toLowerCase() && item.password === p);
+    
+            if (found) {
+                currentUser = found;
+                document.getElementById('login-overlay').style.display = 'none';
+                errDiv.innerText = '';
+                applyUserSession();
+                saveAppData();
+            } else {
+                errDiv.innerText = "Username atau password salah! Periksa kembali data akun Anda.";
+            }
+        }
+        
         async function prosesLogin() {
             const u = document.getElementById('login-username').value.trim();
             const p = document.getElementById('login-password').value.trim();
