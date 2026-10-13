@@ -436,9 +436,6 @@
                 <input type="password" id="login-password" placeholder="Masukkan password">
             </div>
             <button class="btn btn-success" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="prosesLogin()">Masuk (Login)</button>
-            <div style="margin-top: 12px; text-align: center;">
-                <button type="button" onclick="resetSesiLokal()" style="background: none; border: none; color: #666; font-size: 0.78rem; text-decoration: underline; cursor: pointer;">🔄 Reset Sesi / Masuk Darurat</button>
-            </div>
             <div id="login-error" style="color: #ef4444; font-size: 0.82rem; font-weight: 600; margin-top: 10px; text-align: center;"></div>
         </div>
     </div>
@@ -497,9 +494,9 @@
         <!-- TAB ADMIN: MANAJEMEN PENGGUNA -->
         <div id="tab-admin" class="tab-content">
             <div class="card">
-                <h3>🛡️ Manajemen Akun Pengguna (Database Cloud Terintegrasi)</h3>
+                <h3>🛡️ Manajemen Akun Pengguna (Full Cloud Database)</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                    Tambahkan, edit, atau hapus akun pengguna. Perubahan akan langsung disinkronkan secara permanen ke Database Cloud Google Sheets.
+                    Seluruh data akun tersimpan penuh di Cloud Google Sheets dan dapat diakses secara real-time dari perangkat manapun.
                 </p>
                 
                 <input type="hidden" id="edit-mode-index" value="-1">
@@ -967,11 +964,7 @@
 
         const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbzgT7jwxgowM98prnmbh5MYbiRRQmnXP7wW4DiQQLMUbcB7dQEwEF_8cVvaqXL6wAav/exec";
 
-        let listUsers = [
-            { name: "Administrator", username: "admin", password: "123", role: "admin" },
-            { name: "Pengguna Sekolah", username: "user", password: "123", role: "user" }
-        ];
-
+        let listUsers = []; // Data akun murni ditarik dari Cloud Database
         let currentUser = null;
 
         const checklistKlasifikasi = {
@@ -983,34 +976,29 @@
         };
 
         async function fetchUsersFromCloud() {
-            if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) return;
+            if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
+                alert("URL Cloud Database belum diatur!");
+                return;
+            }
             try {
                 let res = await fetch(CLOUD_API_URL + "?action=getUsers", { method: "GET", redirect: "follow" });
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
                 if (json && json.status === "success" && Array.isArray(json.users)) {
-                    let cloudUsers = json.users;
-                    let defaultUsers = [
-                        { name: "Administrator", username: "admin", password: "123", role: "admin" },
-                        { name: "Pengguna Sekolah", username: "user", password: "123", role: "user" }
-                    ];
-                    defaultUsers.forEach(defU => {
-                        if (!cloudUsers.some(cu => cu.username === defU.username)) {
-                            cloudUsers.push(defU);
-                        }
-                    });
-                    listUsers = cloudUsers;
+                    listUsers = json.users; // Full Cloud Data
                     renderUsersTable();
-                    saveAppData();
+                } else {
+                    console.error("Gagal mengambil data akun dari cloud:", json.message);
                 }
             } catch (e) {
-                console.warn("Koneksi cloud tertunda, menggunakan data akun lokal:", e);
+                console.error("Koneksi cloud gagal:", e);
+                alert("❌ Gagal terhubung ke Cloud Database untuk memuat akun pengguna.");
             }
         }
 
         async function syncUsersToCloud(actionType, userObj, targetUsername = "") {
             if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
-                alert("✅ Aksi berhasil disimpan secara lokal!");
+                alert("URL Cloud Database belum diatur!");
                 return;
             }
 
@@ -1030,20 +1018,19 @@
                 let json = JSON.parse(textRes);
 
                 if (json.status === "success" && json.users) {
-                    listUsers = json.users;
+                    listUsers = json.users; // Pembaruan murni dari Cloud
                     renderUsersTable();
-                    saveAppData();
                     alert("✅ Berhasil disinkronkan ke Database Cloud Google Sheets!");
                 } else {
                     alert("Gagal sinkronisasi cloud: " + (json.message || "Kesalahan"));
                 }
             } catch(e) {
                 console.error("Gagal sinkronisasi cloud:", e);
-                alert("⚠️ Tersimpan lokal (Gagal terhubung ke Cloud Database).");
+                alert("❌ Gagal terhubung ke Cloud Database.");
             }
         }
 
-        function simpanAtauTambahUser() {
+        async function simpanAtauTambahUser() {
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim();
             const password = document.getElementById('new-user-password').value.trim();
@@ -1056,36 +1043,25 @@
             }
 
             if (editIdx === -1) {
-                // Tambah User Baru
                 if (listUsers.some(usr => usr.username.toLowerCase() === username.toLowerCase())) {
                     alert("Username sudah digunakan, pilih username lain!");
                     return;
                 }
                 const newUserObj = { name, username, password, role };
-                listUsers.push(newUserObj);
-                renderUsersTable();
-                saveAppData();
-                syncUsersToCloud("addUser", newUserObj);
+                await syncUsersToCloud("addUser", newUserObj);
             } else {
-                // Edit User
                 let oldUser = listUsers[editIdx];
                 if (oldUser.username === "admin" && username !== "admin") {
                     alert("Username admin utama tidak boleh diubah!");
                     return;
                 }
                 
-                oldUser.name = name;
-                oldUser.username = username;
-                oldUser.password = password;
-                oldUser.role = role;
-
+                let editedUserObj = { name, username, password, role };
                 document.getElementById('edit-mode-index').value = "-1";
                 document.getElementById('btn-submit-user').innerText = "+ Tambah Akun ke Cloud Database";
                 document.getElementById('btn-cancel-edit').style.display = "none";
                 
-                renderUsersTable();
-                saveAppData();
-                syncUsersToCloud("editUser", oldUser, oldUser.username);
+                await syncUsersToCloud("editUser", editedUserObj, oldUser.username);
             }
 
             document.getElementById('new-user-name').value = '';
@@ -1119,18 +1095,14 @@
             document.getElementById('btn-cancel-edit').style.display = "none";
         }
 
-        function hapusUser(index) {
+        async function hapusUser(index) {
             let usr = listUsers[index];
             if (usr.username === "admin" || usr.role === "admin") {
                 alert("Akun Administrator tidak dapat dihapus!");
                 return;
             }
-            if (confirm(`Apakah Anda yakin ingin menghapus akun user "${usr.name}" (${usr.username})?`)) {
-                let targetUsername = usr.username;
-                listUsers.splice(index, 1);
-                renderUsersTable();
-                saveAppData();
-                syncUsersToCloud("deleteUser", null, targetUsername);
+            if (confirm(`Apakah Anda yakin ingin menghapus akun user "${usr.name}" (${usr.username}) dari Cloud?`)) {
+                await syncUsersToCloud("deleteUser", null, usr.username);
             }
         }
 
@@ -1156,7 +1128,7 @@
             });
         }
 
-        function prosesLogin() {
+        async function prosesLogin() {
             const u = document.getElementById('login-username').value.trim();
             const p = document.getElementById('login-password').value.trim();
             const errDiv = document.getElementById('login-error');
@@ -1166,6 +1138,9 @@
                 return;
             }
 
+            // Ambil data terbaru langsung dari cloud saat tombol login ditekan
+            await fetchUsersFromCloud();
+
             const found = listUsers.find(item => item.username.toLowerCase() === u.toLowerCase() && item.password === p);
             if (found) {
                 currentUser = found;
@@ -1174,7 +1149,7 @@
                 applyUserSession();
                 saveAppData();
             } else {
-                errDiv.innerText = "Username atau password salah! Coba admin / 123 atau user / 123";
+                errDiv.innerText = "Username atau password salah! Periksa kembali data akun Anda.";
             }
         }
 
@@ -1185,11 +1160,6 @@
             document.getElementById('login-overlay').style.display = 'flex';
             document.getElementById('profile-dropdown').classList.remove('active');
             saveAppData();
-        }
-
-        function resetSesiLokal() {
-            localStorage.removeItem('lpj_bosp_online_data_v6');
-            location.reload();
         }
 
         function applyUserSession() {
@@ -1221,7 +1191,6 @@
 
         function saveAppData() {
             const appData = {
-                listUsers: listUsers,
                 currentUser: currentUser,
                 sekolah: {
                     npsn: document.getElementById('npsn').value,
@@ -1258,24 +1227,23 @@
                 bgImage: document.body.style.backgroundImage || ''
             };
             try {
-                localStorage.setItem('lpj_bosp_online_data_v6', JSON.stringify(appData));
+                localStorage.setItem('lpj_bosp_online_data_v7', JSON.stringify(appData));
             } catch (e) {
                 console.error("Gagal menyimpan ke localStorage:", e);
             }
         }
 
-        function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_online_data_v6');
+        async function loadAppData() {
+            // Ambil data akun murni dari Cloud terlebih dahulu saat aplikasi dimuat
+            await fetchUsersFromCloud();
+
+            const saved = localStorage.getItem('lpj_bosp_online_data_v7');
             if (!saved) {
-                document.getElementById('login-overlay').style.display = 'flex';
+                if (!currentUser) document.getElementById('login-overlay').style.display = 'flex';
                 return;
             }
             try {
                 const appData = JSON.parse(saved);
-                
-                if (appData.listUsers && Array.isArray(appData.listUsers)) {
-                    listUsers = appData.listUsers;
-                }
                 
                 if (appData.currentUser && appData.currentUser.username) {
                     currentUser = appData.currentUser;
@@ -1359,7 +1327,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
-            fetchUsersFromCloud();
         });
 
         function toggleProfileMenu(e) {
@@ -1406,7 +1373,7 @@
             if(tabId === 'tab-admin') {
                 const btnAdmin = document.getElementById('menu-btn-admin');
                 if(btnAdmin) btnAdmin.classList.add('active');
-                renderUsersTable();
+                fetchUsersFromCloud(); // Muat ulang data terbaru dari cloud saat masuk menu admin
             }
         }
 
@@ -1890,7 +1857,6 @@
             doc.setFont("helvetica", "bold");
             doc.text(item.uraian, 15, 102, { maxWidth: 180 });
 
-            // Tanda Tangan
             let startY = 140;
             doc.setFont("helvetica", "normal");
             doc.text("Mengetahui,", 35, startY);
@@ -1920,6 +1886,30 @@
 
         function closeSuccessModal() {
             document.getElementById('success-modal').classList.remove('active');
+        }
+
+        function terbilang(n) {
+            n = Math.floor(n);
+            const angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+            if (n < 12) return angka[n];
+            if (n < 20) return terbilang(n - 10) + " Belas";
+            if (n < 100) return terbilang(Math.floor(n / 10)) + " Puluh " + terbilang(n % 10);
+            if (n < 200) return "Seratus " + terbilang(n - 100);
+            if (n < 1000) return terbilang(Math.floor(n / 100)) + " Ratus " + terbilang(n % 100);
+            if (n < 2000) return "Seribu " + terbilang(n - 1000);
+            if (n < 1000000) return terbilang(Math.floor(n / 1000)) + " Ribu " + terbilang(n % 1000);
+            if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + " Juta " + terbilang(n % 1000000);
+            return n.toString();
+        }
+
+        function parseRupiah(str) {
+            if (!str) return 0;
+            let clean = str.toString().replace(/[^\d]/g, '');
+            return parseInt(clean) || 0;
+        }
+
+        function formatRupiah(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
     </script>
 </body>
