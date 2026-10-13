@@ -955,7 +955,6 @@
         let daftarLPJ = [];
         let processedBKUForForm = [];
 
-        // Ganti URL di bawah dengan URL Web App Google Apps Script Anda yang valid
         const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbzgT7jwxgowM98prnmbh5MYbiRRQmnXP7wW4DiQQLMUbcB7dQEwEF_8cVvaqXL6wAav/exec";
 
         let listUsers = [
@@ -973,63 +972,57 @@
             "Konsumsi": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi"]
         };
 
-        // --- SINKRONISASI CLOUD GOOGLE APPS SCRIPT ---
         async function fetchUsersFromCloud() {
-            if (CLOUD_API_URL.includes("ISI_URL")) return;
+            if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) return;
             try {
                 let res = await fetch(CLOUD_API_URL + "?action=getUsers", { method: "GET", redirect: "follow" });
-                let json = await res.json();
-                if (json && json.users) {
+                let textRes = await res.text();
+                let json = JSON.parse(textRes);
+                if (json && json.users && Array.isArray(json.users) && json.users.length > 0) {
                     listUsers = json.users;
                     renderUsersTable();
                 }
             } catch (e) {
-                console.error("Gagal sinkronisasi data cloud:", e);
+                console.warn("Menggunakan daftar user lokal (Mode Offline aktif).");
             }
         }
 
-async function addUserToCloud(newUserObj) {
-    if (CLOUD_API_URL.includes("ISI_URL")) {
-        listUsers.push(newUserObj);
-        renderUsersTable();
-        saveAppData();
-        alert("Akun berhasil ditambahkan secara lokal (Mode Offline)!");
-        return;
-    }
-    try {
-        let res = await fetch(CLOUD_API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "addUser", user: newUserObj })
-        });
-        
-        let textRes = await res.text();
-        let json;
-        try {
-            json = JSON.parse(textRes);
-        } catch (err) {
-            console.error("Respon bukan JSON:", textRes);
-            alert("Gagal: Server mengembalikan respon non-JSON. Pastikan izin Deploy 'Anyone' sudah benar.");
-            return;
-        }
-
-        if (json.status === "success") {
-            listUsers = json.users;
+        async function addUserToCloud(newUserObj) {
+            listUsers.push(newUserObj);
             renderUsersTable();
             saveAppData();
-            alert("Akun berhasil disimpan ke server Cloud Google Drive & tersinkronisasi!");
-        } else {
-            alert("Gagal menambahkan akun ke cloud: " + (json.message || "Kesalahan tidak diketahui"));
+
+            if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
+                alert("Akun berhasil ditambahkan secara lokal!");
+                return;
+            }
+            try {
+                let res = await fetch(CLOUD_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "addUser", user: newUserObj })
+                });
+                let textRes = await res.text();
+                let json = JSON.parse(textRes);
+                if (json.status === "success" && json.users) {
+                    listUsers = json.users;
+                    renderUsersTable();
+                    saveAppData();
+                    alert("Akun berhasil disimpan ke server Cloud & tersinkronisasi!");
+                }
+            } catch(e) {
+                console.error(e);
+            }
         }
-    } catch(e) {
-        console.error(e);
-        alert("Terjadi kesalahan jaringan saat menyimpan ke cloud.");
-    }
-}
-        // --- SISTEM LOGIN & OTENTIKASI ---
+
         function prosesLogin() {
             const u = document.getElementById('login-username').value.trim();
             const p = document.getElementById('login-password').value.trim();
             const errDiv = document.getElementById('login-error');
+
+            if (!u || !p) {
+                errDiv.innerText = "Username dan password wajib diisi!";
+                return;
+            }
 
             const found = listUsers.find(item => item.username === u && item.password === p);
             if (found) {
@@ -1049,34 +1042,36 @@ async function addUserToCloud(newUserObj) {
             document.getElementById('login-password').value = '';
             document.getElementById('login-overlay').style.display = 'flex';
             document.getElementById('profile-dropdown').classList.remove('active');
+            saveAppData();
         }
 
         function applyUserSession() {
             if (!currentUser) return;
-            document.getElementById('display-user-name').innerText = currentUser.name;
-            document.getElementById('dropdown-user-name').innerText = currentUser.name;
-            document.getElementById('display-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('display-user-name').innerText = currentUser.name || 'Admin';
+            document.getElementById('dropdown-user-name').innerText = currentUser.name || 'Admin';
+            document.getElementById('display-avatar').innerText = (currentUser.name || 'A').charAt(0).toUpperCase();
             
             const badge = document.getElementById('dropdown-role-badge');
             const adminMenu = document.getElementById('menu-btn-admin');
             const linkSettings = document.getElementById('link-menu-settings');
 
             if (currentUser.role === 'admin') {
-                badge.innerText = "Role: Administrator (Akses Penuh)";
-                adminMenu.style.display = 'flex';
-                linkSettings.style.display = 'flex';
+                if (badge) badge.innerText = "Role: Administrator (Akses Penuh)";
+                if (adminMenu) adminMenu.style.display = 'flex';
+                if (linkSettings) linkSettings.style.display = 'flex';
             } else {
-                badge.innerText = "Role: Pengguna (Terbatas)";
-                adminMenu.style.display = 'none';
-                linkSettings.style.display = 'none';
-                if (document.getElementById('tab-settings').classList.contains('active') || document.getElementById('tab-admin').classList.contains('active')) {
+                if (badge) badge.innerText = "Role: Pengguna (Terbatas)";
+                if (adminMenu) adminMenu.style.display = 'none';
+                if (linkSettings) linkSettings.style.display = 'none';
+                
+                const activeTab = document.querySelector('.tab-content.active');
+                if (activeTab && (activeTab.id === 'tab-settings' || activeTab.id === 'tab-admin')) {
                     switchTab('tab-data');
                 }
             }
             renderUsersTable();
         }
 
-        // --- MANAJEMEN USER OLEH ADMIN ---
         function tambahUserBaruCloud() {
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim();
@@ -1115,7 +1110,6 @@ async function addUserToCloud(newUserObj) {
             });
         }
 
-        // --- SISTEM PENYIMPANAN LOCALSTORAGE ---
         function saveAppData() {
             const appData = {
                 listUsers: listUsers,
@@ -1155,25 +1149,32 @@ async function addUserToCloud(newUserObj) {
                 bgImage: document.body.style.backgroundImage || ''
             };
             try {
-                localStorage.setItem('lpj_bosp_online_data_v5', JSON.stringify(appData));
+                localStorage.setItem('lpj_bosp_online_data_v6', JSON.stringify(appData));
             } catch (e) {
                 console.error("Gagal menyimpan ke localStorage:", e);
             }
         }
 
         function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_online_data_v5');
-            if (!saved) return;
+            const saved = localStorage.getItem('lpj_bosp_online_data_v6');
+            if (!saved) {
+                // Pastikan overlay login muncul jika belum ada sesi tersimpan
+                document.getElementById('login-overlay').style.display = 'flex';
+                return;
+            }
             try {
                 const appData = JSON.parse(saved);
                 
-                if (appData.listUsers) {
+                if (appData.listUsers && Array.isArray(appData.listUsers)) {
                     listUsers = appData.listUsers;
                 }
-                if (appData.currentUser) {
+                
+                if (appData.currentUser && appData.currentUser.username) {
                     currentUser = appData.currentUser;
                     document.getElementById('login-overlay').style.display = 'none';
                     applyUserSession();
+                } else {
+                    document.getElementById('login-overlay').style.display = 'flex';
                 }
 
                 if (appData.sekolah) {
@@ -1244,6 +1245,7 @@ async function addUserToCloud(newUserObj) {
                 }
             } catch (e) {
                 console.error("Gagal memuat data tersimpan:", e);
+                document.getElementById('login-overlay').style.display = 'flex';
             }
         }
 
