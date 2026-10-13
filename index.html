@@ -989,13 +989,25 @@
                 console.error("Gagal mengambil data dari cloud:", e);
             }
         }
+
+        async function fetchUsersFromCloud() {
+            if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) return;
+            try {
+                let res = await fetch(CLOUD_API_URL + "?action=getUsers", { method: "GET", redirect: "follow" });
+                let textRes = await res.text();
+                let json = JSON.parse(textRes);
+                if (json && json.status === "success" && Array.isArray(json.users)) {
+                    listUsers = json.users; // Mengambil data langsung dari Database Cloud Google Sheets
+                    renderUsersTable();
+                }
+            } catch (e) {
+                console.error("Gagal mengambil data dari database cloud:", e);
+            }
+        }
         
         async function addUserToCloud(newUserObj) {
             if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
-                listUsers.push(newUserObj);
-                renderUsersTable();
-                saveAppData();
-                alert("✅ Akun berhasil ditambahkan secara lokal (Cloud URL belum aktif).");
+                alert("URL Cloud Database belum diatur!");
                 return;
             }
 
@@ -1006,26 +1018,20 @@
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     redirect: "follow"
                 });
-                
+        
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
-
+        
                 if (json.status === "success" && json.users) {
                     listUsers = json.users;
                     renderUsersTable();
-                    alert("✅ Akun berhasil disimpan ke Google Sheets Cloud!");
+                    alert("✅ Akun berhasil disimpan secara permanen di Database Cloud Google Sheets dan dapat diakses dari perangkat manapun!");
                 } else {
-                    listUsers.push(newUserObj);
-                    renderUsersTable();
-                    saveAppData();
-                    alert("⚠️ Disimpan secara lokal (Respons server cloud tidak valid).");
+                    alert("Gagal menyimpan ke cloud: " + (json.message || "Kesalahan tidak diketahui"));
                 }
             } catch(e) {
                 console.error(e);
-                listUsers.push(newUserObj);
-                renderUsersTable();
-                saveAppData();
-                alert("⚠️ Jaringan cloud gagal, akun disimpan secara lokal di browser ini.");
+                alert("❌ Gagal terhubung ke database cloud. Pastikan URL Apps Script aktif dan pengaturan akses disetel ke 'Anyone' (Siapa saja).");
             }
         }
 
