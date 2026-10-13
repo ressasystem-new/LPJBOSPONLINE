@@ -484,7 +484,7 @@
         </button>
 
         <div class="sidebar-footer-info">
-            <div class="app-ver">Versi 0.9-Online</div>
+            <div class="app-ver">Versi 1.0-Cloud</div>
             <div>© 2026 Dinas Pendidikan dan Kebudayaan Kota Manado</div>
         </div>
     </div>
@@ -494,9 +494,9 @@
         <!-- TAB ADMIN: MANAJEMEN PENGGUNA -->
         <div id="tab-admin" class="tab-content">
             <div class="card">
-                <h3>🛡️ Manajemen Akun Pengguna</h3>
+                <h3>🛡️ Manajemen Akun Pengguna (Cloud Terintegrasi)</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                    Sebagai Admin, Anda dapat menambahkan akun pengguna baru beserta username, password, dan level hak akses.
+                    Akun yang ditambahkan di sini akan langsung tersimpan di server cloud dan dapat diakses dari perangkat manapun.
                 </p>
                 <div class="form-row">
                     <div class="form-group">
@@ -521,7 +521,7 @@
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-success" onclick="tambahUserBaru()">+ Tambah Akun Pengguna Baru</button>
+                <button class="btn btn-success" onclick="tambahUserBaruCloud()">+ Tambah Akun ke Server Cloud</button>
 
                 <div class="table-container" style="margin-top: 20px;">
                     <table id="tabel-users">
@@ -956,7 +956,9 @@
         let daftarLPJ = [];
         let processedBKUForForm = [];
 
-        // Data Akun Pengguna Default (Admin awal: admin / admin123)
+        // URL Web App Google Apps Script (Ganti URL ini setelah Anda membuat script cloud)
+        const CLOUD_API_URL = "ISI_URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI";
+
         let listUsers = [
             { name: "Administrator", username: "admin", password: "123", role: "admin" },
             { name: "Pengguna Sekolah", username: "user", password: "123", role: "user" }
@@ -971,6 +973,50 @@
             "Perjalanan Dinas": ["Kuitansi", "Bukti Transaksi", "Surat Undangan", "Bukti Absensi", "SPPD yang sudah ditandatangani", "Foto/Dokumentasi"],
             "Konsumsi": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi"]
         };
+
+        // --- SINKRONISASI CLOUD GOOGLE APPS SCRIPT ---
+        async function fetchUsersFromCloud() {
+            if (CLOUD_API_URL === "ISI_URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI") return;
+            try {
+                let res = await fetch(CLOUD_API_URL + "?action=getUsers");
+                let json = await res.json();
+                if (json && json.users) {
+                    listUsers = json.users;
+                    renderUsersTable();
+                }
+            } catch (e) {
+                console.error("Gagal sinkronisasi data cloud:", e);
+            }
+        }
+
+        async function addUserToCloud(newUserObj) {
+            if (CLOUD_API_URL === "ISI_URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI") {
+                // Fallback lokal jika belum diatur
+                listUsers.push(newUserObj);
+                renderUsersTable();
+                saveAppData();
+                alert("Akun berhasil ditambahkan secara lokal!");
+                return;
+            }
+            try {
+                let res = await fetch(CLOUD_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "addUser", user: newUserObj })
+                });
+                let json = await res.json();
+                if (json.status === "success") {
+                    listUsers = json.users;
+                    renderUsersTable();
+                    saveAppData();
+                    alert("Akun berhasil ditambahkan ke Cloud Server Google Drive!");
+                } else {
+                    alert("Gagal menambahkan akun ke cloud.");
+                }
+            } catch(e) {
+                console.error(e);
+                alert("Terjadi kesalahan jaringan saat menyimpan ke cloud.");
+            }
+        }
 
         // --- SISTEM LOGIN & OTENTIKASI ---
         function prosesLogin() {
@@ -1016,7 +1062,6 @@
                 badge.innerText = "Role: Pengguna (Terbatas)";
                 adminMenu.style.display = 'none';
                 linkSettings.style.display = 'none';
-                // Jika user biasa sedang di tab-settings atau tab-admin, pindahkan ke tab-data
                 if (document.getElementById('tab-settings').classList.contains('active') || document.getElementById('tab-admin').classList.contains('active')) {
                     switchTab('tab-data');
                 }
@@ -1025,7 +1070,7 @@
         }
 
         // --- MANAJEMEN USER OLEH ADMIN ---
-        function tambahUserBaru() {
+        function tambahUserBaruCloud() {
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim();
             const password = document.getElementById('new-user-password').value.trim();
@@ -1041,13 +1086,12 @@
                 return;
             }
 
-            listUsers.push({ name, username, password, role });
+            const newUserObj = { name, username, password, role };
             document.getElementById('new-user-name').value = '';
             document.getElementById('new-user-username').value = '';
             document.getElementById('new-user-password').value = '';
-            renderUsersTable();
-            saveAppData();
-            alert("Akun pengguna berhasil ditambahkan!");
+            
+            addUserToCloud(newUserObj);
         }
 
         function renderUsersTable() {
@@ -1061,20 +1105,10 @@
                     <td>${usr.username}</td>
                     <td><span class="bukti-badge">${usr.role.toUpperCase()}</span></td>
                     <td style="text-align:center;">
-                        ${usr.username !== 'admin' ? `<button onclick="hapusUser(${idx})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600;">Hapus</button>` : '-'}
+                        ${usr.username !== 'admin' ? `-` : '-'}
                     </td>
                 </tr>`;
             });
-        }
-
-        function hapusUser(idx) {
-            if(listUsers[idx].username === 'admin') {
-                alert("Akun Admin utama tidak dapat dihapus!");
-                return;
-            }
-            listUsers.splice(idx, 1);
-            renderUsersTable();
-            saveAppData();
         }
 
         // --- SISTEM PENYIMPANAN LOCALSTORAGE ---
@@ -1117,14 +1151,14 @@
                 bgImage: document.body.style.backgroundImage || ''
             };
             try {
-                localStorage.setItem('lpj_bosp_online_data_v3', JSON.stringify(appData));
+                localStorage.setItem('lpj_bosp_online_data_v4', JSON.stringify(appData));
             } catch (e) {
                 console.error("Gagal menyimpan ke localStorage:", e);
             }
         }
 
         function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_online_data_v3');
+            const saved = localStorage.getItem('lpj_bosp_online_data_v4');
             if (!saved) return;
             try {
                 const appData = JSON.parse(saved);
@@ -1211,6 +1245,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
+            fetchUsersFromCloud();
         });
 
         function toggleProfileMenu(e) {
@@ -1234,7 +1269,6 @@
         }
 
         function switchTab(tabId) {
-            // Batasi akses jika user biasa mencoba membuka pengaturan atau manajemen akun
             if (currentUser && currentUser.role === 'user' && (tabId === 'tab-settings' || tabId === 'tab-admin')) {
                 alert("Akses ditolak! Akun Anda hanya dapat mengakses menu Data Master, Upload BKU, Buat LPJ, dan Cetak LPJ.");
                 return;
