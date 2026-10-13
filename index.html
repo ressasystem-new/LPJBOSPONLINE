@@ -964,8 +964,10 @@
 
         const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbzgT7jwxgowM98prnmbh5MYbiRRQmnXP7wW4DiQQLMUbcB7dQEwEF_8cVvaqXL6wAav/exec";
 
-        let listUsers = []; // Data akun murni ditarik dari Cloud Database
-        let currentUser = null;
+        let listUsers = [
+            { name: "Administrator", username: "admin", password: "123", role: "admin" },
+            { name: "Pengguna Sekolah", username: "user", password: "123", role: "user" }
+        ];
 
         const checklistKlasifikasi = {
             "Jasa": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi", "SK Pengangkatan / Perjanjian Kerja Sama", "Daftar Hadir"],
@@ -976,36 +978,17 @@
         };
 
         async function fetchUsersFromCloud() {
-            if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
-                console.warn("URL Cloud Database belum diatur.");
-                return;
-            }
+            if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) return;
             try {
-                let res = await fetch(CLOUD_API_URL + "?action=getUsers", { method: "GET", redirect: "follow" });
+                let res = await fetch(CLOUD_API_URL + "?action=getUsers", { method: "GET" });
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
-                if (json && json.status === "success" && Array.isArray(json.users)) {
-                    let cloudUsers = json.users;
-            
-                    // Fallback pengaman: Pastikan akun default admin & user selalu ada jika sheet kosong
-                    let defaultUsers = [
-                        { name: "Administrator", username: "admin", password: "123", role: "admin" },
-                        { name: "Pengguna Sekolah", username: "user", password: "123", role: "user" }
-                    ];
-            
-                    defaultUsers.forEach(defU => {
-                        if (!cloudUsers.some(cu => cu.username.toLowerCase() === defU.username.toLowerCase())) {
-                            cloudUsers.push(defU);
-                        }
-                    });
-
-                    listUsers = cloudUsers; 
+                if (json && json.status === "success" && Array.isArray(json.users) && json.users.length > 0) {
+                    listUsers = json.users;
                     renderUsersTable();
-                } else {
-                    console.error("Gagal memuat akun dari cloud:", json.message);
                 }
             } catch (e) {
-                console.error("Kesalahan koneksi saat mengambil data cloud:", e);
+                console.warn("Menggunakan data akun lokal/fallback:", e);
             }
         }
                    
@@ -1145,17 +1128,18 @@
             const u = document.getElementById('login-username').value.trim();
             const p = document.getElementById('login-password').value.trim();
             const errDiv = document.getElementById('login-error');
-            
+
             if (!u || !p) {
                 errDiv.innerText = "Username dan password wajib diisi!";
                 return;
             }
 
-            errDiv.innerText = "Sedang memverifikasi akun ke Cloud...";
+            errDiv.innerText = "Memverifikasi akun...";
 
-            // Wajib tarik data terbaru dari cloud sesaat sebelum mencocokkan kredensial login
+            // Coba ambil data terbaru dari cloud
             await fetchUsersFromCloud();
 
+            // Cocokkan username & password (tidak case-sensitive untuk username)
             const found = listUsers.find(item => item.username.toLowerCase() === u.toLowerCase() && item.password === p);
     
             if (found) {
@@ -1165,7 +1149,7 @@
                 applyUserSession();
                 saveAppData();
             } else {
-                errDiv.innerText = "Username atau password salah! Periksa kembali data akun Anda.";
+                errDiv.innerText = "Username atau password salah! Periksa kembali input Anda.";
             }
         }
         
