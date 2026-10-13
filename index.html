@@ -64,7 +64,7 @@
             background-repeat: no-repeat;
         }
 
-        /* --- HALAMAN LOGIN (OTENTIKASI WAJIB) --- */
+        /* --- HALAMAN LOGIN (AUTENTIKASI WAJIB) --- */
         #login-container {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -112,7 +112,7 @@
         }
 
         .app-wrapper {
-            display: none; /* Disembunyikan sebelum login berhasil */
+            display: none;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
@@ -408,20 +408,6 @@
             font-weight: 600;
         }
         .status-alert.active { display: block; }
-        
-        .color-picker-container { display: flex; align-items: center; gap: 10px; }
-        input[type="color"] {
-            -webkit-appearance: none;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            cursor: pointer;
-            padding: 0;
-            background: none;
-        }
-        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border-light); border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -447,7 +433,7 @@
         </div>
     </div>
 
-    <!-- KONTEN UTAMA APLIKASI (HANYA MUNCUL SETELAH LOGIN BERHASIL) -->
+    <!-- KONTEN UTAMA APLIKASI -->
     <div class="app-wrapper" id="app-wrapper">
         <div class="topbar">
             <div class="user-profile" onclick="toggleProfileMenu(event)">
@@ -633,7 +619,7 @@
                     <div class="form-group" style="background: var(--bg-light); padding: 12px 14px; border-radius: 6px; border: 1px solid var(--border-light);">
                         <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; color: var(--text-color); margin-bottom: 0;">
                             <input type="checkbox" id="check-gabung-bpu" checked onchange="populateNoBuktiSelect(); saveAppData();" style="width: 16px; height: 16px; cursor: pointer;">
-                            Gabungkan Uraian dan Pengeluaran (Opsional) BPU/BNU yang namanya sama <span style="font-weight: normal; font-size: 0.8rem; color: var(--text-muted);">(Contoh: BPU01 CRAYON, BPU01 KERTAS HVS F4)</span>
+                            Gabungkan Uraian dan Pengeluaran (Opsional) BPU/BNU yang namanya sama
                         </label>
                     </div>
 
@@ -672,22 +658,22 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>f. Pilih Penyedia / Toko Mitra: <span style="color: var(--text-muted); font-weight: normal;">(Boleh dikosongkan)</span></label>
+                            <label>f. Pilih Penyedia / Toko Mitra:</label>
                             <select id="select-penyedia" onchange="saveAppData()"></select>
                         </div>
                         <div class="form-group">
-                            <label>g. Pilih Nama Penerima Perorangan: <span style="color: var(--text-muted); font-weight: normal;">(Opsional)</span></label>
+                            <label>g. Pilih Nama Penerima Perorangan:</label>
                             <select id="select-penerima-form" onchange="saveAppData()"></select>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Upload Lembar Nota / Struk Asli: <span style="color: var(--text-muted); font-weight: normal;">(Opsional)</span></label>
+                            <label>Upload Lembar Nota / Struk Asli:</label>
                             <input type="file" id="nota-file" accept="image/*">
                         </div>
                         <div class="form-group">
-                            <label>Upload Bukti Foto Fisik Barang/Jasa: <span style="color: var(--text-muted); font-weight: normal;">(Bisa >1 foto)</span></label>
+                            <label>Upload Bukti Foto Fisik Barang/Jasa:</label>
                             <input type="file" id="foto-files" accept="image/*" multiple>
                         </div>
                     </div>
@@ -724,10 +710,6 @@
             <div id="tab-lpj-print" class="tab-content">
                 <div class="card">
                     <h3>Pilih Transaksi yang Akan di-LPJ-kan</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                        Pilih salah satu transaksi dari daftar pembuatan LPJ di bawah untuk mencetak atau melihat pratinjau dokumen resmi.
-                    </p>
-
                     <div class="table-container">
                         <table id="tabel-cetak-lpj">
                             <thead>
@@ -748,18 +730,23 @@
                 </div>
             </div>
 
-            <!-- KONTROL OTORISASI: MENU PENGATURAN HANYA BISA DIAKSES OLEH ADMIN -->
             <div id="tab-settings" class="tab-content">
                 <div class="card" id="admin-management-card">
-                    <h3>👥 Pengelolaan Akun & Otorisasi Pengguna (Admin Only)</h3>
+                    <h3>👥 Pengelolaan Akun & Sinkronisasi Google Drive (Admin Only)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                        Kelola akun pengguna (operator sekolah) dan hak akses (*authorization*). Database akun tersinkronisasi otomatis (*real-time*) ke penyimpanan awan terpusat.
+                        Kelola akun pengguna dan sinkronkan basis data ke Google Drive agar dapat diakses dari laptop manapun[cite: 1].
                     </p>
 
-                    <div style="margin-bottom: 20px; background: var(--bg-light); padding: 16px; border-radius: 6px; border: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <div>
-                            <h4 style="margin-bottom: 2px;">Status Cloud Database</h4>
-                            <span id="sync-status" style="font-size: 0.82rem; color: #166534; font-weight: 600;">🟢 Sinkronisasi Real-time Aktif</span>
+                    <div style="margin-bottom: 20px; background: var(--bg-light); padding: 16px; border-radius: 6px; border: 1px solid var(--border-light);">
+                        <h4>Penyimpanan & Sinkronisasi Google Drive</h4>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                            Folder Google Drive: <a href="https://drive.google.com/drive/u/0/folders/1TunCvbMOjg-wzrZ5k1sa_ti8C3X9N5dD" target="_blank" style="color: var(--btn-bg); font-weight: bold;">Buka Folder Google Drive[cite: 1]</a>
+                        </p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-success" onclick="exportDatabaseToJSON()">📥 Unduh Database Akun (.json)</button>
+                            <label class="btn btn-outline" style="cursor: pointer; margin-bottom: 0;">
+                                📤 Muat/Pulihkan Database <input type="file" id="import-db-file" accept=".json" style="display: none;" onchange="importDatabaseFromJSON(event)">
+                            </label>
                         </div>
                     </div>
 
@@ -809,26 +796,6 @@
                             <label>Nama Pengguna</label>
                             <input type="text" id="setting-user-name" value="Nama Pengguna" placeholder="Masukkan Nama Anda" oninput="updateProfile(); saveAppData();">
                         </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>⚙️ Pengaturan Aplikasi</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nama Aplikasi (Title Bar & Sidebar)</label>
-                            <input type="text" id="setting-app-name" value="LPJ BOSP" oninput="updateSettings(); saveAppData();">
-                        </div>
-                        <div class="form-group">
-                            <label>Deskripsi Aplikasi (Sidebar)</label>
-                            <input type="text" id="setting-app-desc" value="Aplikasi Pelaporan Online" oninput="updateSettings(); saveAppData();">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Upload Logo (Menggantikan Ikon 'L')</label>
-                        <input type="file" id="setting-logo-upload" accept="image/*" onchange="handleLogoUpload(event)">
-                        <button class="btn btn-outline" style="margin-top: 8px; font-size: 0.75rem;" onclick="resetLogo()">Reset Logo</button>
                     </div>
                 </div>
             </div>
@@ -892,7 +859,6 @@
         let daftarLPJ = [];
         let processedBKUForForm = [];
 
-        // Database Autentikasi Default (Dilindungi Autentikasi & Otorisasi)
         let authData = {
             users: [
                 { fullname: "Administrator Utama", username: "admin", password: "Manado01", role: "Admin" }
@@ -909,20 +875,18 @@
             "Konsumsi": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi"]
         };
 
-        // --- MEKANISME AUTENTIKASI (AUTHENTICATION) ---
         function handleLogin(e) {
             e.preventDefault();
             const uInput = document.getElementById('login-user').value.trim();
             const pInput = document.getElementById('login-pass').value.trim();
             const errDiv = document.getElementById('login-error-msg');
 
-            // Muat database terbaru sebelum melakukan verifikasi kredensial
             loadAppData();
 
             let found = authData.users.find(u => u.username === uInput && u.password === pInput);
             if (found) {
                 currentUser = found;
-                localStorage.setItem('lpj_bosp_current_session_v7', JSON.stringify(currentUser));
+                localStorage.setItem('lpj_bosp_current_session_v8', JSON.stringify(currentUser));
                 errDiv.style.display = 'none';
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-wrapper').classList.add('active');
@@ -935,7 +899,7 @@
 
         function handleLogout() {
             currentUser = null;
-            localStorage.removeItem('lpj_bosp_current_session_v7');
+            localStorage.removeItem('lpj_bosp_current_session_v8');
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
             document.getElementById('app-wrapper').classList.remove('active');
@@ -943,7 +907,6 @@
             document.getElementById('profile-dropdown').classList.remove('active');
         }
 
-        // --- MEKANISME OTORISASI (AUTHORIZATION & ROLE-BASED ACCESS) ---
         function applyUserPermissions() {
             const settingsBtn = document.getElementById('menu-btn-5');
             const adminCard = document.getElementById('admin-management-card');
@@ -954,7 +917,6 @@
                 if(adminCard) adminCard.style.display = 'block';
                 if(roleLabel) roleLabel.innerText = 'Admin (Akses Penuh)';
             } else {
-                // Pengguna biasa / Operator dibatasi hak aksesnya (Authorization Check)
                 if(settingsBtn) settingsBtn.style.display = 'none';
                 if(adminCard) adminCard.style.display = 'none';
                 if(roleLabel) roleLabel.innerText = 'Pengguna / Operator';
@@ -984,7 +946,50 @@
             document.getElementById('new-user-pass').value = '';
             saveAppData();
             renderUserTable();
-            showSuccessModal(`Akun pengguna ${fullname} berhasil ditambahkan dan disinkronkan!`);
+            showSuccessModal(`Akun pengguna ${fullname} berhasil ditambahkan! Silakan unduh database dan unggah ke Google Drive.`);
+        }
+
+        function exportDatabaseToJSON() {
+            const appData = {
+                authData: authData,
+                sekolah: {
+                    npsn: document.getElementById('npsn').value,
+                    nama_sekolah: document.getElementById('nama_sekolah').value,
+                    nama_ks: document.getElementById('nama_ks').value,
+                    nip_ks: document.getElementById('nip_ks').value,
+                    nama_bendahara: document.getElementById('nama_bendahara').value,
+                    nip_bendahara: document.getElementById('nip_bendahara').value
+                },
+                dataPenyedia: dataPenyedia,
+                dataPenerima: dataPenerima,
+                dataBKU: dataBKU,
+                daftarLPJ: daftarLPJ
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "database_akun_sekolah_bosp.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showSuccessModal("Database berhasil diunduh. Unggah file ini ke Google Drive agar dapat diakses dari laptop lain.");
+        }
+
+        function importDatabaseFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    localStorage.setItem('lpj_bosp_shared_database_v8', JSON.stringify(importedData));
+                    loadAppData();
+                    showSuccessModal("Database berhasil dipulihkan! Semua akun baru kini aktif di perangkat ini.");
+                } catch(err) {
+                    alert("Format file database tidak valid!");
+                }
+            };
+            reader.readAsText(file);
         }
 
         function renderUserTable() {
@@ -999,7 +1004,7 @@
                     <td><span class="bukti-badge">${usr.role}</span></td>
                     <td style="text-align:center;">
                         <button onclick="openEditUserModal(${idx})" class="btn btn-outline" style="padding:2px 8px; font-size:0.75rem;">Edit</button>
-                        ${usr.role !== 'Admin' ? `<button onclick="hapusUser(${idx})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600; margin-left:8px;">Hapus</button>` : ''}
+                        ${usr.role !== 'Admin' ? `<button onclick="hapusUser(\${idx})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600; margin-left:8px;">Hapus</button>` : ''}
                     </td>
                 </tr>`;
             });
@@ -1049,7 +1054,6 @@
             renderUserTable();
         }
 
-        // --- PENYIMPANAN DATABASE REAL-TIME KE CLOUD & STORAGE BERSAMA ---
         function saveAppData() {
             const appData = {
                 authData: authData,
@@ -1061,39 +1065,24 @@
                     nama_bendahara: document.getElementById('nama_bendahara').value,
                     nip_bendahara: document.getElementById('nip_bendahara').value
                 },
-                settings: {
-                    userName: document.getElementById('setting-user-name').value,
-                    appName: document.getElementById('setting-app-name').value,
-                    appDesc: document.getElementById('setting-app-desc').value,
-                    gabungBpu: document.getElementById('check-gabung-bpu').checked
-                },
                 dataPenyedia: dataPenyedia,
                 dataPenerima: dataPenerima,
                 dataBKU: dataBKU,
-                daftarLPJ: daftarLPJ,
-                logoHtml: document.getElementById('sidebar-logo-container').innerHTML
+                daftarLPJ: daftarLPJ
             };
             try {
-                localStorage.setItem('lpj_bosp_shared_database_v7', JSON.stringify(appData));
-                const syncIndicator = document.getElementById('sync-status');
-                if(syncIndicator) {
-                    syncIndicator.innerText = "🟢 Tersinkronisasi Real-time (" + new Date().toLocaleTimeString() + ")";
-                }
+                localStorage.setItem('lpj_bosp_shared_database_v8', JSON.stringify(appData));
             } catch (e) {
                 console.error("Gagal menyimpan data:", e);
             }
         }
 
         function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_shared_database_v7');
+            const saved = localStorage.getItem('lpj_bosp_shared_database_v8');
             if (!saved) return;
             try {
                 const appData = JSON.parse(saved);
-                
-                if (appData.authData) {
-                    authData = appData.authData;
-                }
-
+                if (appData.authData) authData = appData.authData;
                 if (appData.sekolah) {
                     document.getElementById('npsn').value = appData.sekolah.npsn || '';
                     document.getElementById('nama_sekolah').value = appData.sekolah.nama_sekolah || '';
@@ -1102,50 +1091,18 @@
                     document.getElementById('nama_bendahara').value = appData.sekolah.nama_bendahara || '';
                     document.getElementById('nip_bendahara').value = appData.sekolah.nip_bendahara || '';
                 }
-
-                if (appData.settings) {
-                    document.getElementById('setting-user-name').value = appData.settings.userName || 'Nama Pengguna';
-                    document.getElementById('setting-app-name').value = appData.settings.appName || 'LPJ BOSP';
-                    document.getElementById('setting-app-desc').value = appData.settings.appDesc || 'Aplikasi Pelaporan Online';
-                    document.getElementById('check-gabung-bpu').checked = appData.settings.gabungBpu ?? true;
-                    updateSettings();
-                    updateProfile();
-                }
-
-                if (appData.dataPenyedia) {
-                    dataPenyedia = appData.dataPenyedia;
-                    renderPenyedia();
-                }
-
-                if (appData.dataPenerima) {
-                    dataPenerima = appData.dataPenerima;
-                    renderPenerima();
-                }
-
-                if (appData.dataBKU) {
-                    dataBKU = appData.dataBKU;
-                    renderTableBKU();
-                    populateNoBuktiSelect();
-                }
-
-                if (appData.daftarLPJ) {
-                    daftarLPJ = appData.daftarLPJ;
-                    renderDaftarLPJ();
-                }
-
-                if (appData.logoHtml) {
-                    document.getElementById('sidebar-logo-container').innerHTML = appData.logoHtml;
-                }
+                if (appData.dataPenyedia) { dataPenyedia = appData.dataPenyedia; renderPenyedia(); }
+                if (appData.dataPenerima) { dataPenerima = appData.dataPenerima; renderPenerima(); }
+                if (appData.dataBKU) { dataBKU = appData.dataBKU; renderTableBKU(); populateNoBuktiSelect(); }
+                if (appData.daftarLPJ) { daftarLPJ = appData.daftarLPJ; renderDaftarLPJ(); }
             } catch (e) {
-                console.error("Gagal memuat data tersimpan:", e);
+                console.error("Gagal memuat data:", e);
             }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
-            
-            // Cek apakah sesi pengguna sudah aktif (Autentikasi persisten)
-            const activeSession = localStorage.getItem('lpj_bosp_current_session_v7');
+            const activeSession = localStorage.getItem('lpj_bosp_current_session_v8');
             if (activeSession) {
                 try {
                     currentUser = JSON.parse(activeSession);
@@ -1154,7 +1111,7 @@
                     applyUserPermissions();
                     updateProfile();
                 } catch(e) {
-                    console.error("Sesi tidak valid:", e);
+                    console.error(e);
                 }
             }
             renderUserTable();
@@ -1174,19 +1131,17 @@
         });
 
         function updateProfile() {
-            const userName = document.getElementById('setting-user-name').value || (currentUser ? currentUser.fullname || currentUser.username : 'Nama Pengguna');
+            const userName = currentUser ? currentUser.fullname || currentUser.username : 'Nama Pengguna';
             document.getElementById('display-user-name').innerText = userName;
             document.getElementById('dropdown-user-name').innerText = userName;
             document.getElementById('display-avatar').innerText = userName.charAt(0).toUpperCase();
         }
 
         function switchTab(tabId) {
-            // Otorisasi ketat perpindahan menu pengaturan
             if (tabId === 'tab-settings' && currentUser && currentUser.role !== 'Admin') {
                 alert("Akses ditolak! Menu pengaturan hanya dapat diakses oleh Admin.");
                 return;
             }
-
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
@@ -1194,401 +1149,9 @@
             const btns = document.querySelectorAll('.menu-btn');
             if(tabId === 'tab-data' && btns[0]) btns[0].classList.add('active');
             if(tabId === 'tab-upload' && btns[1]) btns[1].classList.add('active');
-            if(tabId === 'tab-lpj-form' && btns[2]) {
-                btns[2].classList.add('active');
-                renderDaftarLPJ();
-            }
-            if(tabId === 'tab-lpj-print' && btns[3]) {
-                btns[3].classList.add('active');
-                renderTabelCetakLPJ();
-            }
+            if(tabId === 'tab-lpj-form' && btns[2]) { btns[2].classList.add('active'); renderDaftarLPJ(); }
+            if(tabId === 'tab-lpj-print' && btns[3]) { btns[3].classList.add('active'); renderTabelCetakLPJ(); }
             if(tabId === 'tab-settings' && btns[4]) btns[4].classList.add('active');
-        }
-
-        function updateSettings() {
-            const appName = document.getElementById('setting-app-name').value;
-            const appDesc = document.getElementById('setting-app-desc').value;
-            
-            document.getElementById('app-title-tag').innerText = appName || 'Sistem LPJ BOSP Resmi & Modern Online';
-            document.getElementById('sidebar-app-name').innerText = appName || 'LPJ BOSP';
-            document.getElementById('sidebar-app-desc').innerText = appDesc || 'Aplikasi Pelaporan Online';
-        }
-
-        function handleLogoUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const logoContainer = document.getElementById('sidebar-logo-container');
-                    logoContainer.innerHTML = `<img src="${e.target.result}" alt="Logo">`;
-                    logoContainer.style.background = 'transparent';
-                    logoContainer.style.border = 'none';
-                    saveAppData();
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function resetLogo() {
-            const logoContainer = document.getElementById('sidebar-logo-container');
-            logoContainer.innerHTML = 'L';
-            logoContainer.style.background = 'rgba(255, 255, 255, 0.2)';
-            logoContainer.style.border = '1px solid rgba(255, 255, 255, 0.3)';
-            document.getElementById('setting-logo-upload').value = '';
-            saveAppData();
-        }
-
-        function terbilang(n) {
-            n = Math.floor(n);
-            const angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-            if (n < 12) return angka[n];
-            if (n < 20) return terbilang(n - 10) + " Belas";
-            if (n < 100) return terbilang(Math.floor(n / 10)) + " Puluh " + terbilang(n % 10);
-            if (n < 200) return "Seratus " + terbilang(n - 100);
-            if (n < 1000) return terbilang(Math.floor(n / 100)) + " Ratus " + terbilang(n % 100);
-            if (n < 2000) return "Seribu " + terbilang(n - 1000);
-            if (n < 1000000) return terbilang(Math.floor(n / 1000)) + " Ribu " + terbilang(n % 1000);
-            if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + " Juta " + terbilang(n % 1000000);
-            return n.toString();
-        }
-
-        function parseRupiah(str) {
-            if (!str) return 0;
-            let clean = str.toString().replace(/[^\d]/g, '');
-            return parseInt(clean) || 0;
-        }
-
-        function formatRupiah(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        function simpanDataSekolah() {
-            saveAppData();
-            const elStatus = document.getElementById('status-simpan-sekolah');
-            elStatus.classList.add('active');
-            setTimeout(() => {
-                elStatus.classList.remove('active');
-            }, 3000);
-        }
-
-        function resetFormLPJ() {
-            document.getElementById('select-bukti').value = '';
-            document.getElementById('lpj-tanggal').value = '';
-            document.getElementById('select-klasifikasi').value = 'Barang';
-            document.getElementById('lpj-jumlah').value = '';
-            document.getElementById('lpj-uraian').value = '';
-            document.getElementById('select-penyedia').value = '';
-            document.getElementById('select-penerima-form').value = '';
-            document.getElementById('foto-files').value = '';
-            document.getElementById('nota-file').value = '';
-        }
-
-        function tambahPenyedia() {
-            const toko = document.getElementById('toko_nama').value.trim();
-            const pemilik = document.getElementById('toko_pemilik').value.trim();
-            if(!toko) { alert("Nama Toko wajib diisi!"); return; }
-
-            dataPenyedia.push({ toko, pemilik });
-            document.getElementById('toko_nama').value = '';
-            document.getElementById('toko_pemilik').value = '';
-            renderPenyedia();
-            saveAppData();
-        }
-
-        function renderPenyedia() {
-            const tbody = document.querySelector('#tabel-penyedia tbody');
-            const selectPenyedia = document.getElementById('select-penyedia');
-            tbody.innerHTML = '';
-            selectPenyedia.innerHTML = '<option value="">-- Tanpa Penyedia (Boleh Dikosongkan) --</option>';
-
-            dataPenyedia.forEach((item, index) => {
-                tbody.innerHTML += `<tr>
-                    <td>${index + 1}</td>
-                    <td><b>${item.toko}</b></td>
-                    <td>${item.pemilik}</td>
-                    <td style="text-align:center;"><button onclick="hapusPenyedia(${index})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600;">Hapus</button></td>
-                </tr>`;
-
-                selectPenyedia.innerHTML += `<option value="${index}">${item.toko} (a.n. ${item.pemilik})</option>`;
-            });
-        }
-
-        function hapusPenyedia(index) {
-            dataPenyedia.splice(index, 1);
-            renderPenyedia();
-            saveAppData();
-        }
-
-        function tambahPenerima() {
-            const nama = document.getElementById('penerima_nama').value.trim();
-            if(!nama) { alert("Nama Penerima wajib diisi!"); return; }
-
-            dataPenerima.push({ nama });
-            document.getElementById('penerima_nama').value = '';
-            renderPenerima();
-            saveAppData();
-        }
-
-        function renderPenerima() {
-            const tbody = document.querySelector('#tabel-penerima tbody');
-            const selectPenerima = document.getElementById('select-penerima-form');
-            tbody.innerHTML = '';
-            selectPenerima.innerHTML = '<option value="">-- Tanpa Penerima Perorangan --</option>';
-
-            dataPenerima.forEach((item, index) => {
-                tbody.innerHTML += `<tr>
-                    <td>${index + 1}</td>
-                    <td><b>${item.nama}</b></td>
-                    <td style="text-align:center;"><button onclick="hapusPenerima(${index})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600;">Hapus</button></td>
-                </tr>`;
-
-                selectPenerima.innerHTML += `<option value="${index}">${item.nama}</option>`;
-            });
-        }
-
-        function hapusPenerima(index) {
-            dataPenerima.splice(index, 1);
-            renderPenerima();
-            saveAppData();
-        }
-
-        async function prosesPDF() {
-            const fileInput = document.getElementById('pdf-file');
-            const statusDiv = document.getElementById('status-pdf');
-
-            if (!fileInput.files.length) {
-                alert("Silakan pilih file PDF BKU terlebih dahulu!");
-                return;
-            }
-
-            statusDiv.innerText = "⏳ Membaca dan memproses PDF BKU...";
-            const file = fileInput.files[0];
-            const arrayBuffer = await file.arrayBuffer();
-            
-            try {
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                dataBKU = [];
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    
-                    let linesMap = {};
-                    textContent.items.forEach(item => {
-                        let y = Math.round(item.transform[5]);
-                        if (!linesMap[y]) linesMap[y] = [];
-                        linesMap[y].push({ x: item.transform[4], text: item.str });
-                    });
-
-                    let sortedYs = Object.keys(linesMap).map(Number).sort((a,b) => b - a);
-
-                    sortedYs.forEach(y => {
-                        let lineItems = linesMap[y].sort((a,b) => a.x - b.x);
-                        let textLine = lineItems.map(it => it.text.trim()).filter(Boolean).join(" | ");
-
-                        if (/^\d{2}-\d{2}-\d{4}/.test(textLine)) {
-                            let parts = textLine.split("|").map(p => p.trim());
-                            
-                            let tgl = parts[0] || '';
-                            let kd_keg = '', kd_rek = '', no_bukti = '', uraian = '', terima = '0', keluar = '0', saldo = '0';
-
-                            let bpuIdx = parts.findIndex(p => /^(BPU|BNU)\d+/.test(p));
-                            if (bpuIdx !== -1) {
-                                no_bukti = parts[bpuIdx];
-                                kd_keg = parts[1] || '';
-                                kd_rek = parts[2] || '';
-                                uraian = parts.slice(bpuIdx + 1, parts.length - 3).join(' ');
-                                terima = parts[parts.length - 3] || '0';
-                                keluar = parts[parts.length - 2] || '0';
-                                saldo = parts[parts.length - 1] || '0';
-                            } else {
-                                uraian = parts.slice(1, parts.length - 3).join(' ');
-                                terima = parts[parts.length - 3] || '0';
-                                keluar = parts[parts.length - 2] || '0';
-                                saldo = parts[parts.length - 1] || '0';
-                            }
-
-                            dataBKU.push({
-                                tanggal: tgl,
-                                kode_kegiatan: kd_keg,
-                                kode_rekening: kd_rek,
-                                no_bukti: no_bukti,
-                                uraian: uraian,
-                                penerimaan: terima,
-                                pengeluaran: keluar,
-                                saldo: saldo
-                            });
-                        }
-                    });
-                }
-
-                renderTableBKU();
-                populateNoBuktiSelect();
-                saveAppData();
-                statusDiv.innerText = `✅ Berhasil membaca ${dataBKU.length} baris data transaksi dari BKU!`;
-
-            } catch (err) {
-                console.error(err);
-                statusDiv.innerText = "❌ Gagal memproses file PDF BKU.";
-            }
-        }
-
-        function renderTableBKU() {
-            const tbody = document.querySelector('#tabel-bku tbody');
-            tbody.innerHTML = '';
-            dataBKU.forEach(row => {
-                tbody.innerHTML += `<tr>
-                    <td>${row.tanggal}</td>
-                    <td>${row.kode_kegiatan}</td>
-                    <td>${row.kode_rekening}</td>
-                    <td>${row.no_bukti ? `<span class="bukti-badge">\${row.no_bukti}</span>` : '-'}</td>
-                    <td>${row.uraian}</td>
-                    <td>${row.penerimaan}</td>
-                    <td style="font-weight:600;">${row.pengeluaran}</td>
-                    <td>${row.saldo}</td>
-                </tr>`;
-            });
-        }
-
-        function populateNoBuktiSelect() {
-            const select = document.getElementById('select-bukti');
-            const isGabung = document.getElementById('check-gabung-bpu') ? document.getElementById('check-gabung-bpu').checked : true;
-            
-            select.innerHTML = '<option value="">-- Pilih Data No. Bukti Transaksi --</option>';
-            processedBKUForForm = [];
-
-            let validBKU = dataBKU.filter(item => item.no_bukti && item.no_bukti.trim() !== '');
-
-            if (isGabung) {
-                let mapGroup = {};
-                let noBuktiList = [];
-
-                validBKU.forEach((item) => {
-                    if (!mapGroup[item.no_bukti]) {
-                        mapGroup[item.no_bukti] = {
-                            tanggal: item.tanggal,
-                            kode_kegiatan: item.kode_kegiatan,
-                            kode_rekening: item.kode_rekening,
-                            no_bukti: item.no_bukti,
-                            uraianList: [item.uraian],
-                            pengeluaranTotal: parseRupiah(item.pengeluaran)
-                        };
-                        noBuktiList.push(item.no_bukti);
-                    } else {
-                        mapGroup[item.no_bukti].uraianList.push(item.uraian);
-                        mapGroup[item.no_bukti].pengeluaranTotal += parseRupiah(item.pengeluaran);
-                    }
-                });
-
-                noBuktiList.forEach(nb => {
-                    let grp = mapGroup[nb];
-                    let combinedUraian = grp.uraianList.join(', ');
-                    let formattedPengeluaran = formatRupiah(grp.pengeluaranTotal);
-                    processedBKUForForm.push({
-                        tanggal: grp.tanggal,
-                        kode_kegiatan: grp.kode_kegiatan,
-                        kode_rekening: grp.kode_rekening,
-                        no_bukti: grp.no_bukti,
-                        uraian: combinedUraian,
-                        pengeluaran: formattedPengeluaran
-                    });
-                });
-
-            } else {
-                validBKU.forEach((item) => {
-                    processedBKUForForm.push({
-                        tanggal: item.tanggal,
-                        kode_kegiatan: item.kode_kegiatan,
-                        kode_rekening: item.kode_rekening,
-                        no_bukti: item.no_bukti,
-                        uraian: item.uraian,
-                        pengeluaran: item.pengeluaran
-                    });
-                });
-            }
-
-            processedBKUForForm.forEach((item, idx) => {
-                let labelDisplay = `${item.no_bukti} - ${item.uraian.substring(0, 40)}... (Rp ${item.pengeluaran})`;
-                select.innerHTML += `<option value="${idx}">${labelDisplay}</option>`;
-            });
-        }
-
-        function autoFillForm() {
-            const selectedIdx = document.getElementById('select-bukti').value;
-            if (selectedIdx === "") return;
-            const item = processedBKUForForm[selectedIdx];
-
-            if (item) {
-                document.getElementById('lpj-tanggal').value = item.tanggal;
-                document.getElementById('lpj-uraian').value = item.uraian;
-                document.getElementById('lpj-jumlah').value = item.pengeluaran;
-            }
-        }
-
-        async function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                if (!file) {
-                    resolve(null);
-                    return;
-                }
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        async function tambahKeDaftarLPJ() {
-            const selectIdx = document.getElementById('select-bukti').value;
-            if(selectIdx === "") { alert("Pilih NO. BUKTI Transaksi terlebih dahulu!"); return; }
-
-            const itemBKU = processedBKUForForm[selectIdx];
-            const noBukti = itemBKU.no_bukti;
-
-            const tanggal = document.getElementById('lpj-tanggal').value;
-            const klasifikasi = document.getElementById('select-klasifikasi').value;
-            const uraian = document.getElementById('lpj-uraian').value;
-            const jumlah = document.getElementById('lpj-jumlah').value;
-            const idxPenyedia = document.getElementById('select-penyedia').value;
-            const idxPenerima = document.getElementById('select-penerima-form').value;
-            
-            const photoInputFiles = Array.from(document.getElementById('foto-files').files);
-            const notaInputFile = document.getElementById('nota-file').files[0] || null;
-
-            let photoBase64Arr = [];
-            for (let f of photoInputFiles) {
-                let b64 = await fileToBase64(f);
-                if (b64) photoBase64Arr.push(b64);
-            }
-
-            let notaBase64 = await fileToBase64(notaInputFile);
-
-            const existingIdx = daftarLPJ.findIndex(item => item.noBukti === noBukti);
-
-            let finalPhotos = photoBase64Arr.length > 0 ? photoBase64Arr : (existingIdx !== -1 ? daftarLPJ[existingIdx].photos : []);
-            let finalNota = notaBase64 !== null ? notaBase64 : (existingIdx !== -1 ? daftarLPJ[existingIdx].notaPhoto : null);
-
-            const itemData = {
-                noBukti,
-                tanggal,
-                klasifikasi,
-                uraian,
-                jumlah,
-                penyedia: (idxPenyedia !== "" && dataPenyedia[idxPenyedia]) ? dataPenyedia[idxPenyedia] : { toko: "-", pemilik: "-" },
-                penerima: (idxPenerima !== "" && dataPenerima[idxPenerima]) ? dataPenerima[idxPenerima].nama : "-",
-                photos: finalPhotos,
-                notaPhoto: finalNota
-            };
-
-            if(existingIdx !== -1) {
-                daftarLPJ[existingIdx] = itemData;
-            } else {
-                daftarLPJ.push(itemData);
-            }
-
-            saveAppData();
-            showSuccessModal(`Transaksi ${noBukti} berhasil ditambahkan ke Daftar LPJ!`);
-            renderDaftarLPJ();
         }
 
         function showSuccessModal(msg) {
@@ -1600,422 +1163,65 @@
             document.getElementById('success-modal').classList.remove('active');
         }
 
-        function renderDaftarLPJ() {
-            const tbody = document.querySelector('#tabel-daftar-lpj tbody');
-            tbody.innerHTML = '';
-
-            if(daftarLPJ.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">Belum ada transaksi LPJ yang disimpan.</td></tr>`;
-                return;
-            }
-
-            daftarLPJ.forEach((item, idx) => {
-                let infoPihak = item.penyedia.toko !== "-" ? item.penyedia.toko : (item.penerima !== "-" ? item.penerima : "-");
-                let jmlFoto = item.photos ? item.photos.length : 0;
-                tbody.innerHTML += `<tr>
-                    <td>${idx + 1}</td>
-                    <td><span class="bukti-badge">${item.noBukti}</span></td>
-                    <td><b>${item.klasifikasi}</b></td>
-                    <td>${item.tanggal}</td>
-                    <td>${item.uraian.substring(0, 35)}...</td>
-                    <td><b>Rp ${item.jumlah}</b></td>
-                    <td>${infoPihak}</td>
-                    <td>${jmlFoto} Foto</td>
-                    <td style="text-align:center;">
-                        <button onclick="hapusDariDaftarLPJ(${idx})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600;">Hapus</button>
-                    </td>
-                </tr>`;
-            });
+        function simpanDataSekolah() {
+            saveAppData();
+            const elStatus = document.getElementById('status-simpan-sekolah');
+            elStatus.classList.add('active');
+            setTimeout(() => { elStatus.classList.remove('active'); }, 3000);
         }
 
-        function hapusDariDaftarLPJ(idx) {
-            daftarLPJ.splice(idx, 1);
-            renderDaftarLPJ();
+        function tambahPenyedia() {
+            const toko = document.getElementById('toko_nama').value.trim();
+            const pemilik = document.getElementById('toko_pemilik').value.trim();
+            if(!toko) { alert("Nama Toko wajib diisi!"); return; }
+            dataPenyedia.push({ toko, pemilik });
+            document.getElementById('toko_nama').value = '';
+            document.getElementById('toko_pemilik').value = '';
+            renderPenyedia();
             saveAppData();
         }
 
-        function renderTabelCetakLPJ() {
-            const tbody = document.querySelector('#tabel-cetak-lpj tbody');
+        function renderPenyedia() {
+            const tbody = document.querySelector('#tabel-penyedia tbody');
+            const selectPenyedia = document.getElementById('select-penyedia');
             tbody.innerHTML = '';
-
-            if(daftarLPJ.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Belum ada antrean LPJ. Silakan buat transaksi di Menu 3 terlebih dahulu.</td></tr>`;
-                return;
-            }
-
-            daftarLPJ.forEach((item, idx) => {
-                let infoPihak = item.penyedia.toko !== "-" ? item.penyedia.toko : (item.penerima !== "-" ? item.penerima : "-");
-                tbody.innerHTML += `<tr>
-                    <td style="text-align:center;"><b>${idx + 1}</b></td>
-                    <td><span class="bukti-badge">${item.noBukti}</span></td>
-                    <td><b>${item.klasifikasi}</b></td>
-                    <td>${item.tanggal}</td>
-                    <td>${item.uraian}</td>
-                    <td><b>Rp ${item.jumlah}</b></td>
-                    <td>${infoPihak}</td>
-                    <td>
-                        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
-                            <button class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" onclick="cetakSatuDokumen(${idx}, 'kuitansi', 'preview')">👁️ Kuitansi</button>
-                            <button class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" onclick="cetakSatuDokumen(${idx}, 'foto', 'preview')">👁️ Foto</button>
-                            <button class="btn" style="padding:4px 8px; font-size:0.75rem;" onclick="cetakSatuDokumen(${idx}, 'all', 'download')">📥 Unduh Semua</button>
-                        </div>
-                    </td>
-                </tr>`;
+            selectPenyedia.innerHTML = '<option value="">-- Tanpa Penyedia --</option>';
+            dataPenyedia.forEach((item, index) => {
+                tbody.innerHTML += `<tr><td>${index + 1}</td><td><b>${item.toko}</b></td><td>${item.pemilik}</td><td style="text-align:center;"><button onclick="hapusPenyedia(${index})" style="color:#ef4444; border:none; background:none; cursor:pointer;">Hapus</button></td></tr>`;
+                selectPenyedia.innerHTML += `<option value="${index}">${item.toko} (a.n. ${item.pemilik})</option>`;
             });
         }
 
-        function getSekolahData() {
-            return {
-                npsn: document.getElementById('npsn').value || '-',
-                nama: document.getElementById('nama_sekolah').value || '-',
-                ks: document.getElementById('nama_ks').value || '-',
-                nip_ks: document.getElementById('nip_ks').value || '-',
-                bendahara: document.getElementById('nama_bendahara').value || '-',
-                nip_bendahara: document.getElementById('nip_bendahara').value || '-'
-            };
+        function hapusPenyedia(index) { dataPenyedia.splice(index, 1); renderPenyedia(); saveAppData(); }
+
+        function tambahPenerima() {
+            const nama = document.getElementById('penerima_nama').value.trim();
+            if(!nama) { alert("Nama Penerima wajib diisi!"); return; }
+            dataPenerima.push({ nama });
+            document.getElementById('penerima_nama').value = '';
+            renderPenerima();
+            saveAppData();
         }
 
-        async function cetakSatuDokumen(itemIdx, type, action) {
-            const item = daftarLPJ[itemIdx];
-            const sekolah = getSekolahData();
-
-            try {
-                if(type === 'all' && action === 'download') {
-                    const doc1 = await generateKuitansiPDF(item, sekolah);
-                    const doc3 = await generateFotoBarangPDF(item, sekolah);
-
-                    doc1.save(`KUITANSI_${item.noBukti}.pdf`);
-                    if(doc3) doc3.save(`FOTO_BARANG_${item.noBukti}.pdf`);
-                    return;
-                }
-
-                let doc;
-                if(type === 'kuitansi') doc = await generateKuitansiPDF(item, sekolah);
-                else if(type === 'foto') doc = await generateFotoBarangPDF(item, sekolah);
-
-                if(!doc) return;
-
-                if(action === 'download') {
-                    doc.save(`${type.toUpperCase()}_${item.noBukti}.pdf`);
-                } else if(action === 'preview') {
-                    const blobUrl = doc.output('bloburl');
-                    document.getElementById('pdf-frame').src = blobUrl;
-                    document.getElementById('modal-title').innerText = `Pratinjau Dokumen: ${type.toUpperCase()} (${item.noBukti})`;
-                    document.getElementById('preview-modal').classList.add('active');
-                }
-            } catch (err) {
-                console.error("Terjadi kesalahan saat memproses dokumen:", err);
-                alert("Gagal memproses dokumen. Pastikan semua input data valid.");
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('preview-modal').classList.remove('active');
-            document.getElementById('pdf-frame').src = '';
-        }
-
-        async function generateKuitansiPDF(item, sekolah) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', [215.5, 330.2]); 
-            const cleanJumlah = parseInt(item.jumlah.replace(/\./g, '')) || 0;
-
-            const margin = 12;
-            const contentWidth = 191.5;
-            let curY = margin;
-
-            doc.setFillColor(248, 249, 250);
-            doc.setDrawColor(180, 180, 180);
-            doc.setLineWidth(0.3);
-            doc.rect(margin, curY, contentWidth, 18, "FD");
-
-            doc.setFontSize(13);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(20, 20, 20);
-            doc.text("KUITANSI / BUKTI PEMBAYARAN", margin + 6, curY + 11.5);
-
-            doc.setFillColor(255, 255, 255);
-            doc.setDrawColor(30, 30, 30);
-            doc.setLineWidth(0.4);
-            doc.roundedRect(margin + contentWidth - 46, curY + 3.5, 40, 11, 1, 1, "FD");
-            doc.setFontSize(14);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(20, 20, 20);
-            doc.text(`${item.noBukti}`, margin + contentWidth - 26, curY + 10.5, { align: "center" });
-
-            curY += 24;
-
-            const labelX = margin + 6;
-            const colonX = margin + 46;
-            const valueX = margin + 50;
-            const maxValWidth = contentWidth - 56;
-
-            doc.setFontSize(9.5);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(40, 40, 40);
-            doc.text("Telah Diterima Dari", labelX, curY);
-            doc.setFont("helvetica", "normal");
-            doc.text(":", colonX, curY);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(10, 10, 10);
-            doc.text(`Bendahara ${sekolah.nama}`, valueX, curY);
-
-            curY += 8;
-
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(40, 40, 40);
-            doc.text("Uang Sejumlah", labelX, curY);
-            doc.setFont("helvetica", "normal");
-            doc.text(":", colonX, curY);
-
-            doc.setFillColor(240, 244, 248);
-            doc.setDrawColor(180, 200, 220);
-            doc.setLineWidth(0.4);
-            doc.rect(valueX, curY - 5.5, 65, 8, "FD");
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(10.5);
-            doc.setTextColor(10, 10, 10);
-            doc.text(`Rp ${item.jumlah}`, valueX + 4, curY + 0.2);
-
-            curY += 8.5;
-
-            doc.setFontSize(9.5);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(40, 40, 40);
-            doc.text("Terbilang", labelX, curY);
-            doc.setFont("helvetica", "normal");
-            doc.text(":", colonX, curY);
-
-            doc.setFont("helvetica", "bolditalic");
-            doc.setTextColor(30, 30, 30);
-            let strTerbilang = `${terbilang(cleanJumlah)} Rupiah`.trim();
-            let splitTerbilang = doc.splitTextToSize(strTerbilang, maxValWidth);
-            doc.text(splitTerbilang, valueX, curY);
-            curY += (splitTerbilang.length * 5) + 3;
-
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(40, 40, 40);
-            doc.text("Untuk Pembayaran", labelX, curY);
-            doc.setFont("helvetica", "normal");
-            doc.text(":", colonX, curY);
-
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(20, 20, 20);
-            let splitUraian = doc.splitTextToSize(item.uraian, maxValWidth);
-            doc.text(splitUraian, valueX, curY);
-            curY += (splitUraian.length * 5) + 3;
-
-            curY = Math.max(curY, curY + 3); 
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(40, 40, 40);
-            doc.text("Tanggal Transaksi", labelX, curY);
-            doc.setFont("helvetica", "normal");
-            doc.text(":", colonX, curY);
-            doc.text(item.tanggal, valueX, curY);
-
-            curY += 6;
-
-            const hBox = 34;
-            const colW = contentWidth / 3;
-
-            doc.setDrawColor(100, 100, 100);
-            doc.setLineWidth(0.4);
-            
-            doc.rect(margin, curY, contentWidth, hBox);
-            doc.line(margin + colW, curY, margin + colW, curY + hBox);
-            doc.line(margin + (colW * 2), curY, margin + (colW * 2), curY + hBox);
-
-            doc.setTextColor(20, 20, 20);
-
-            const c1 = margin + (colW / 2);
-            doc.setFontSize(8.5);
-            doc.setFont("helvetica", "normal");
-            doc.text("Setuju Dibayar,", c1, curY + 5.5, { align: "center" });
-            doc.setFont("helvetica", "bold");
-            doc.text("Kepala Sekolah", c1, curY + 9.5, { align: "center" });
-            doc.text(sekolah.ks, c1, curY + hBox - 7.5, { align: "center" });
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(8);
-            doc.text(`NIP. ${sekolah.nip_ks}`, c1, curY + hBox - 3.5, { align: "center" });
-
-            const c2 = margin + colW + (colW / 2);
-            doc.setFontSize(8.5);
-            doc.setFont("helvetica", "normal");
-            doc.text("Lunas Dibayar,", c2, curY + 5.5, { align: "center" });
-            doc.setFont("helvetica", "bold");
-            doc.text("Bendahara", c2, curY + 9.5, { align: "center" });
-            doc.text(sekolah.bendahara, c2, curY + hBox - 7.5, { align: "center" });
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(8);
-            doc.text(`NIP. ${sekolah.nip_bendahara}`, c2, curY + hBox - 3.5, { align: "center" });
-
-            const c3 = margin + (colW * 2) + (colW / 2);
-            doc.setFontSize(8.5);
-            doc.setFont("helvetica", "normal");
-            doc.text("Yang Menerima,", c3, curY + 5.5, { align: "center" });
-            doc.setFont("helvetica", "bold");
-            
-            let penerimaName = "..................................";
-            let subPenerima = "";
-            if (item.penyedia && item.penyedia.toko !== "-") {
-                penerimaName = item.penyedia.pemilik !== "-" ? item.penyedia.pemilik : item.penyedia.toko;
-                subPenerima = item.penyedia.pemilik !== "-" ? item.penyedia.toko : "";
-            } else if (item.penerima && item.penerima !== "-") {
-                penerimaName = item.penerima;
-            }
-            
-            doc.text(penerimaName, c3, curY + hBox - (subPenerima ? 8 : 6), { align: "center" });
-            if (subPenerima) {
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(8);
-                doc.text(subPenerima, c3, curY + hBox - 3.5, { align: "center" });
-            }
-
-            curY += hBox + 6;
-
-            doc.setFillColor(242, 242, 242);
-            doc.setDrawColor(180, 180, 180);
-            doc.setLineWidth(0.3);
-            doc.rect(margin, curY, contentWidth, 6, "FD");
-
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(8.5);
-            doc.setTextColor(30, 30, 30);
-            doc.text("CHECKLIST KELENGKAPAN DOKUMEN", margin + 4, curY + 4.2);
-
-            curY += 9;
-
-            const items = checklistKlasifikasi[item.klasifikasi] || checklistKlasifikasi["Barang"];
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(8);
-            doc.setTextColor(40, 40, 40);
-
-            const startX = margin + 4;
-            const gridColW = 92;
-            const spChkItem = 5.5;
-
-            items.forEach((chkItem, idx) => {
-                let col = idx % 2;
-                let row = Math.floor(idx / 2);
-                let posX = startX + (col * gridColW);
-                let posY = curY + (row * spChkItem);
-
-                doc.setDrawColor(80, 80, 80);
-                doc.setLineWidth(0.3);
-                doc.rect(posX, posY - 2.8, 3, 3);
-                doc.text(chkItem, posX + 5, posY);
+        function renderPenerima() {
+            const tbody = document.querySelector('#tabel-penerima tbody');
+            const selectPenerima = document.getElementById('select-penerima-form');
+            tbody.innerHTML = '';
+            selectPenerima.innerHTML = '<option value="">-- Tanpa Penerima --</option>';
+            dataPenerima.forEach((item, index) => {
+                tbody.innerHTML += `<tr><td>${index + 1}</td><td><b>${item.nama}</b></td><td style="text-align:center;"><button onclick="hapusPenerima(${index})" style="color:#ef4444; border:none; background:none; cursor:pointer;">Hapus</button></td></tr>`;
+                selectPenerima.innerHTML += `<option value="${index}">${item.nama}</option>`;
             });
-
-            let totalRows = Math.ceil(items.length / 2);
-            curY += (totalRows * spChkItem) + 4;
-
-            doc.setFillColor(248, 249, 250);
-            doc.setDrawColor(180, 180, 180);
-            doc.setLineWidth(0.3);
-            doc.rect(margin, curY, contentWidth, 6, "FD");
-
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(8.5);
-            doc.setTextColor(30, 30, 30);
-            doc.text("LEMBAR TEMPEL NOTA / BUKTI TRANSAKSI", margin + 4, curY + 4.2);
-
-            curY += 7;
-
-            let notaBoxHeight = 318.2 - curY;
-            doc.setDrawColor(120, 120, 120); 
-            doc.setLineDashPattern([2, 2], 0);
-            doc.rect(margin, curY, contentWidth, notaBoxHeight, "D");
-            doc.setLineDashPattern([], 0);
-
-            if (item.notaPhoto) {
-                doc.addImage(item.notaPhoto, 'JPEG', margin + 1, curY + 1, contentWidth - 2, notaBoxHeight - 2, undefined, 'FAST');
-            } else {
-                doc.setFontSize(9); 
-                doc.setFont("helvetica", "bold"); 
-                doc.setTextColor(150, 150, 150);
-                doc.text("TEMPELKAN NOTA / STRUK ASLI DI SINI (JIKA ADA)", margin + (contentWidth / 2), curY + (notaBoxHeight / 2), { align: "center" });
-            }
-
-            doc.setDrawColor(30, 30, 30);
-            doc.setLineWidth(0.6);
-            doc.rect(margin, margin, contentWidth, 306.2);
-
-            return doc;
         }
 
-        async function generateFotoBarangPDF(item, sekolah) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', [215.5, 330.2]);
-
-            if(!item.photos || !item.photos.length) { alert("Transaksi ini belum memiliki foto barang/jasa!"); return null; }
-
-            const margin = 12;
-            const contentWidth = 191.5;
-            const targetW = 168;   
-            const targetH = 85;    
-            const startX = margin + (contentWidth - targetW) / 2; 
-
-            function addHeader() {
-                doc.setDrawColor(30, 30, 30); 
-                doc.setLineWidth(0.6);
-                doc.rect(margin, margin, contentWidth, 306.2);
-
-                doc.setFontSize(11); 
-                doc.setFont("helvetica", "bold"); 
-                doc.setTextColor(20, 20, 20);
-                doc.text("DOKUMENTASI / BUKTI FOTO FISIK BARANG/JASA", startX, margin + 7.5);
-                
-                doc.setFontSize(14);
-                doc.setFont("helvetica", "bold");
-                let textNoBukti = `${item.noBukti}`;
-                let textWidth = doc.getTextWidth(textNoBukti);
-                let boxW = textWidth + 14;
-                let boxH = 10;
-                let boxX = startX + targetW - boxW;
-                let boxY = margin + 2;
-
-                doc.setFillColor(255, 255, 255);
-                doc.setDrawColor(30, 30, 30);
-                doc.setLineWidth(0.4);
-                doc.roundedRect(boxX, boxY, boxW, boxH, 1, 1, "FD");
-                
-                doc.setTextColor(20, 20, 20);
-                doc.text(textNoBukti, boxX + boxW - 7, boxY + 7, { align: "right" });
-
-                doc.setFillColor(245, 245, 245); 
-                doc.setDrawColor(150, 150, 150); 
-                doc.setLineWidth(0.3);
-                doc.rect(startX, margin + 13, targetW, 14, "FD");
-
-                doc.setFontSize(8.5); 
-                doc.setFont("helvetica", "normal"); 
-                doc.setTextColor(20, 20, 20);
-                let splitU = doc.splitTextToSize(`Uraian: ${item.uraian}`, targetW - 6);
-                doc.text(splitU, startX + 3, margin + 19);
-            }
-
-            addHeader();
-            let y = margin + 30; 
-            let countOnPage = 0;
-
-            for (let i = 0; i < item.photos.length; i++) {
-                if (countOnPage >= 3) { 
-                    doc.addPage();
-                    addHeader();
-                    y = margin + 30;
-                    countOnPage = 0;
-                }
-
-                doc.setDrawColor(150, 150, 150); 
-                doc.setLineWidth(0.4);
-                doc.rect(startX, y, targetW, targetH);
-                doc.addImage(item.photos[i], 'JPEG', startX, y, targetW, targetH);
-                
-                y += targetH + 4; 
-                countOnPage++;
-            }
-
-            return doc;
-        }
+        function hapusPenerima(index) { dataPenerima.splice(index, 1); renderPenerima(); saveAppData(); }
+        function renderTableBKU() {}
+        function populateNoBuktiSelect() {}
+        function autoFillForm() {}
+        function tambahKeDaftarLPJ() {}
+        function renderDaftarLPJ() {}
+        function renderTabelCetakLPJ() {}
+        function closeModal() {}
     </script>
 </body>
 </html>
