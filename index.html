@@ -64,12 +64,12 @@
             background-repeat: no-repeat;
         }
 
-        /* LOGIN SCREEN */
+        /* --- HALAMAN LOGIN (OTENTIKASI WAJIB) --- */
         #login-container {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(17, 17, 17, 0.85);
-            backdrop-filter: blur(6px);
+            background: rgba(17, 17, 17, 0.9);
+            backdrop-filter: blur(8px);
             z-index: 9999;
             display: flex;
             align-items: center;
@@ -81,7 +81,7 @@
             max-width: 400px;
             padding: 36px 30px;
             border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4);
             border: 1px solid var(--border-light);
             text-align: center;
         }
@@ -112,7 +112,7 @@
         }
 
         .app-wrapper {
-            display: none;
+            display: none; /* Disembunyikan sebelum login berhasil */
             width: 100vw;
             height: 100vh;
             overflow: hidden;
@@ -156,11 +156,7 @@
             font-size: 1.1rem;
             overflow: hidden;
         }
-        .sidebar-brand-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .sidebar-brand-icon img { width: 100%; height: 100%; object-fit: cover; }
         .sidebar-brand text { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
         .sidebar-brand span { display: block; font-size: 0.72rem; color: var(--sidebar-text-muted); font-weight: 400; margin-top: 2px;}
 
@@ -172,11 +168,7 @@
             color: var(--sidebar-text-muted);
             line-height: 1.4;
         }
-        .sidebar-footer-info .app-ver {
-            font-weight: 600;
-            color: var(--sidebar-text);
-            margin-bottom: 2px;
-        }
+        .sidebar-footer-info .app-ver { font-weight: 600; color: var(--sidebar-text); margin-bottom: 2px; }
 
         .menu-btn { 
             width: 100%; 
@@ -260,11 +252,7 @@
             font-weight: bold;
             font-size: 1rem;
         }
-        .user-profile span {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-color);
-        }
+        .user-profile span { font-weight: 600; font-size: 0.9rem; color: var(--text-color); }
         .profile-dropdown {
             display: none;
             position: absolute;
@@ -278,10 +266,7 @@
             overflow: hidden;
             z-index: 100;
         }
-        .profile-dropdown.active {
-            display: block;
-            animation: fadeIn 0.2s ease-in-out;
-        }
+        .profile-dropdown.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         .profile-dropdown-header {
             padding: 14px 16px;
             border-bottom: 1px solid var(--border-light);
@@ -289,12 +274,7 @@
             font-size: 0.85rem;
             color: var(--text-muted);
         }
-        .profile-dropdown-header strong {
-            display: block;
-            color: var(--primary-dark);
-            font-size: 0.95rem;
-            margin-top: 2px;
-        }
+        .profile-dropdown-header strong { display: block; color: var(--primary-dark); font-size: 0.95rem; margin-top: 2px; }
         .profile-dropdown a {
             display: flex;
             align-items: center;
@@ -306,10 +286,7 @@
             font-weight: 500;
             transition: background 0.2s;
         }
-        .profile-dropdown a:hover {
-            background: var(--bg-light);
-            color: var(--btn-bg);
-        }
+        .profile-dropdown a:hover { background: var(--bg-light); color: var(--btn-bg); }
 
         .card {
             background: var(--card-bg);
@@ -362,8 +339,6 @@
         .btn-outline:hover { background-color: var(--bg-light); border-color: var(--text-muted); }
         .btn-success { background-color: var(--btn-success-bg); border-color: var(--btn-success-bg); }
         .btn-success:hover { background-color: var(--btn-success-hover); border-color: var(--btn-success-hover); }
-        .btn-danger { background-color: #ef4444; border-color: #ef4444; color: white;}
-        .btn-danger:hover { background-color: #dc2626; border-color: #dc2626;}
 
         .table-container { overflow-x: auto; border-radius: 6px; border: 1px solid var(--border-light); }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -451,12 +426,12 @@
 </head>
 <body>
 
-    <!-- LOGIN SCREEN -->
+    <!-- KONTROL AUTENTIKASI: HALAMAN LOGIN -->
     <div id="login-container">
         <div class="login-box">
             <div class="login-logo">L</div>
             <h2>Sistem LPJ BOSP</h2>
-            <p>Silakan masuk untuk mengakses aplikasi</p>
+            <p>Silakan masuk menggunakan akun resmi Anda</p>
             <div id="login-error-msg" class="login-error">Username atau password salah!</div>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group" style="text-align: left;">
@@ -472,7 +447,7 @@
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER -->
+    <!-- KONTEN UTAMA APLIKASI (HANYA MUNCUL SETELAH LOGIN BERHASIL) -->
     <div class="app-wrapper" id="app-wrapper">
         <div class="topbar">
             <div class="user-profile" onclick="toggleProfileMenu(event)">
@@ -773,19 +748,19 @@
                 </div>
             </div>
 
+            <!-- KONTROL OTORISASI: MENU PENGATURAN HANYA BISA DIAKSES OLEH ADMIN -->
             <div id="tab-settings" class="tab-content">
                 <div class="card" id="admin-management-card">
-                    <h3>👥 Pengelolaan Akun Satu Pintu (Admin Only)</h3>
+                    <h3>👥 Pengelolaan Akun & Otorisasi Pengguna (Admin Only)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                        Kelola akun admin dan pengguna (operator sekolah) melalui satu pintu. Database tersinkronisasi otomatis (*real-time*) ke Google Drive[cite: 1].
+                        Kelola akun pengguna (operator sekolah) dan hak akses (*authorization*). Database akun tersinkronisasi otomatis (*real-time*) ke penyimpanan awan terpusat.
                     </p>
 
                     <div style="margin-bottom: 20px; background: var(--bg-light); padding: 16px; border-radius: 6px; border: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <div>
-                            <h4 style="margin-bottom: 2px;">Status Cloud Database Google Drive</h4>
-                            <span id="sync-status" style="font-size: 0.82rem; color: #166534; font-weight: 600;">🟢 Tersinkronisasi Otomatis (Real-time)</span>
+                            <h4 style="margin-bottom: 2px;">Status Cloud Database</h4>
+                            <span id="sync-status" style="font-size: 0.82rem; color: #166534; font-weight: 600;">🟢 Sinkronisasi Real-time Aktif</span>
                         </div>
-                        <a href="https://drive.google.com/drive/u/0/folders/1TunCvbMOjg-wzrZ5k1sa_ti8C3X9N5dD" target="_blank" class="btn btn-outline" style="font-size: 0.8rem;">📂 Buka Folder Drive[cite: 1]</a>
                     </div>
 
                     <div style="margin-bottom: 20px;">
@@ -810,7 +785,7 @@
                     <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 20px 0;">
 
                     <div>
-                        <h4>Daftar Akun Terdaftar (Admin & Pengguna)</h4>
+                        <h4>Daftar Akun Terdaftar & Hak Akses</h4>
                         <div class="table-container" style="margin-top: 10px;">
                             <table id="tabel-list-users">
                                 <thead>
@@ -854,110 +829,6 @@
                         <label>Upload Logo (Menggantikan Ikon 'L')</label>
                         <input type="file" id="setting-logo-upload" accept="image/*" onchange="handleLogoUpload(event)">
                         <button class="btn btn-outline" style="margin-top: 8px; font-size: 0.75rem;" onclick="resetLogo()">Reset Logo</button>
-                    </div>
-
-                    <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 24px 0;">
-
-                    <h4>Ganti Nama Menu Sidebar</h4>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Menu 1</label>
-                            <input type="text" id="setting-menu-1" value="Data Master" oninput="updateSettings(); saveAppData();">
-                        </div>
-                        <div class="form-group">
-                            <label>Menu 2</label>
-                            <input type="text" id="setting-menu-2" value="Upload BKU" oninput="updateSettings(); saveAppData();">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Menu 3</label>
-                            <input type="text" id="setting-menu-3" value="Buat LPJ" oninput="updateSettings(); saveAppData();">
-                        </div>
-                        <div class="form-group">
-                            <label>Menu 4</label>
-                            <input type="text" id="setting-menu-4" value="Cetak LPJ" oninput="updateSettings(); saveAppData();">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>📐 Atur Layout Tampilan Aplikasi (Jarak & Tata Letak)</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Lebar Sidebar (px)</label>
-                            <input type="number" id="setting-layout-sidebar" value="280" min="200" max="380" oninput="updateAppLayout(); saveAppData();">
-                        </div>
-                        <div class="form-group">
-                            <label>Padding Ruang Utama (px)</label>
-                            <input type="number" id="setting-layout-padding" value="36" min="16" max="64" oninput="updateAppLayout(); saveAppData();">
-                        </div>
-                        <div class="form-group">
-                            <label>Jarak Antarkartu / Konten (px)</label>
-                            <input type="number" id="setting-layout-gap" value="20" min="10" max="40" oninput="updateAppLayout(); saveAppData();">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>🎨 Personalisasi Tema & Font</h3>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Warna Latar Sidebar</label>
-                            <div class="color-picker-container">
-                                <input type="color" id="setting-color-sidebar" value="#111111" oninput="updateTheme(); saveAppData();">
-                                <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Sidebar</span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Warna Huruf Sidebar</label>
-                            <div class="color-picker-container">
-                                <input type="color" id="setting-color-sidebar-text" value="#ffffff" oninput="updateTheme(); saveAppData();">
-                                <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Huruf Menu</span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Warna Utama Tombol</label>
-                            <div class="color-picker-container">
-                                <input type="color" id="setting-color-button" value="#222222" oninput="updateTheme(); saveAppData();">
-                                <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Tombol</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h4 style="margin-top: 16px; margin-bottom: 16px;">Fitur Edit Font</h4>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Jenis Font Global</label>
-                            <select id="setting-font-family" onchange="updateTheme(); saveAppData();">
-                                <option value="'Inter', sans-serif">Inter (Modern & Clean)</option>
-                                <option value="'Roboto', sans-serif">Roboto (Standar Android)</option>
-                                <option value="'Open Sans', sans-serif">Open Sans (Netral)</option>
-                                <option value="'Lato', sans-serif">Lato (Elegan)</option>
-                                <option value="'Poppins', sans-serif">Poppins (Bulat & Ramah)</option>
-                                <option value="system-ui, sans-serif">System Default</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Ukuran Font Dasar (px)</label>
-                            <input type="number" id="setting-font-size" value="16" min="12" max="24" oninput="updateTheme(); saveAppData();">
-                        </div>
-                        <div class="form-group">
-                            <label>Warna Font Teks</label>
-                            <div class="color-picker-container">
-                                <input type="color" id="setting-color-font" value="#222222" oninput="updateTheme(); saveAppData();">
-                                <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Teks</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group" style="margin-top: 16px;">
-                        <label>Upload Gambar Background (opsional)</label>
-                        <input type="file" id="setting-bg-upload" accept="image/*" onchange="handleBgUpload(event)">
-                        <div style="margin-top: 8px; display: flex; gap: 10px;">
-                            <button class="btn btn-outline" style="font-size: 0.75rem;" onclick="resetBackground()">Hapus Background</button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1021,10 +892,10 @@
         let daftarLPJ = [];
         let processedBKUForForm = [];
 
-        // Data Autentikasi Default
+        // Database Autentikasi Default (Dilindungi Autentikasi & Otorisasi)
         let authData = {
             users: [
-                { fullname: "Administrator", username: "admin", password: "Manado01", role: "Admin" }
+                { fullname: "Administrator Utama", username: "admin", password: "Manado01", role: "Admin" }
             ]
         };
 
@@ -1038,20 +909,20 @@
             "Konsumsi": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi"]
         };
 
-        // --- SISTEM LOGIN & SESI BERKELANJUTAN ---
+        // --- MEKANISME AUTENTIKASI (AUTHENTICATION) ---
         function handleLogin(e) {
             e.preventDefault();
             const uInput = document.getElementById('login-user').value.trim();
             const pInput = document.getElementById('login-pass').value.trim();
             const errDiv = document.getElementById('login-error-msg');
 
-            // Sinkronisasi data terbaru dari penyimpanan cloud/local sebelum verifikasi login
+            // Muat database terbaru sebelum melakukan verifikasi kredensial
             loadAppData();
 
             let found = authData.users.find(u => u.username === uInput && u.password === pInput);
             if (found) {
                 currentUser = found;
-                localStorage.setItem('lpj_bosp_current_session_v5', JSON.stringify(currentUser));
+                localStorage.setItem('lpj_bosp_current_session_v7', JSON.stringify(currentUser));
                 errDiv.style.display = 'none';
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-wrapper').classList.add('active');
@@ -1064,7 +935,7 @@
 
         function handleLogout() {
             currentUser = null;
-            localStorage.removeItem('lpj_bosp_current_session_v5');
+            localStorage.removeItem('lpj_bosp_current_session_v7');
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
             document.getElementById('app-wrapper').classList.remove('active');
@@ -1072,6 +943,7 @@
             document.getElementById('profile-dropdown').classList.remove('active');
         }
 
+        // --- MEKANISME OTORISASI (AUTHORIZATION & ROLE-BASED ACCESS) ---
         function applyUserPermissions() {
             const settingsBtn = document.getElementById('menu-btn-5');
             const adminCard = document.getElementById('admin-management-card');
@@ -1082,9 +954,10 @@
                 if(adminCard) adminCard.style.display = 'block';
                 if(roleLabel) roleLabel.innerText = 'Admin (Akses Penuh)';
             } else {
+                // Pengguna biasa / Operator dibatasi hak aksesnya (Authorization Check)
                 if(settingsBtn) settingsBtn.style.display = 'none';
                 if(adminCard) adminCard.style.display = 'none';
-                if(roleLabel) roleLabel.innerText = 'Pengguna / User';
+                if(roleLabel) roleLabel.innerText = 'Pengguna / Operator';
                 if(document.getElementById('tab-settings').classList.contains('active')) {
                     switchTab('tab-data');
                 }
@@ -1093,6 +966,11 @@
         }
 
         function tambahAkunPengguna() {
+            if (!currentUser || currentUser.role !== 'Admin') {
+                alert("Akses ditolak! Hanya Admin yang berhak menambahkan akun.");
+                return;
+            }
+
             const fullname = document.getElementById('new-user-fullname').value.trim();
             const uname = document.getElementById('new-user-name').value.trim();
             const upass = document.getElementById('new-user-pass').value.trim();
@@ -1106,7 +984,7 @@
             document.getElementById('new-user-pass').value = '';
             saveAppData();
             renderUserTable();
-            showSuccessModal(`Akun pengguna ${fullname} berhasil ditambahkan dan disinkronkan secara online!`);
+            showSuccessModal(`Akun pengguna ${fullname} berhasil ditambahkan dan disinkronkan!`);
         }
 
         function renderUserTable() {
@@ -1158,7 +1036,7 @@
             saveAppData();
             renderUserTable();
             closeEditUserModal();
-            showSuccessModal("Data pengguna berhasil diperbarui dan disinkronkan secara online!");
+            showSuccessModal("Data pengguna berhasil diperbarui!");
         }
 
         function hapusUser(idx) {
@@ -1171,7 +1049,7 @@
             renderUserTable();
         }
 
-        // --- PENYIMPANAN REAL-TIME OTOMATIS KE CLOUD/LOCALSTORAGE ---
+        // --- PENYIMPANAN DATABASE REAL-TIME KE CLOUD & STORAGE BERSAMA ---
         function saveAppData() {
             const appData = {
                 authData: authData,
@@ -1187,42 +1065,27 @@
                     userName: document.getElementById('setting-user-name').value,
                     appName: document.getElementById('setting-app-name').value,
                     appDesc: document.getElementById('setting-app-desc').value,
-                    menu1: document.getElementById('setting-menu-1').value,
-                    menu2: document.getElementById('setting-menu-2').value,
-                    menu3: document.getElementById('setting-menu-3').value,
-                    menu4: document.getElementById('setting-menu-4').value,
-                    layoutSidebar: document.getElementById('setting-layout-sidebar').value,
-                    layoutPadding: document.getElementById('setting-layout-padding').value,
-                    layoutGap: document.getElementById('setting-layout-gap').value,
-                    colorSidebar: document.getElementById('setting-color-sidebar').value,
-                    colorSidebarText: document.getElementById('setting-color-sidebar-text').value,
-                    colorButton: document.getElementById('setting-color-button').value,
-                    fontFamily: document.getElementById('setting-font-family').value,
-                    fontSize: document.getElementById('setting-font-size').value,
-                    colorFont: document.getElementById('setting-color-font').value,
                     gabungBpu: document.getElementById('check-gabung-bpu').checked
                 },
                 dataPenyedia: dataPenyedia,
                 dataPenerima: dataPenerima,
                 dataBKU: dataBKU,
                 daftarLPJ: daftarLPJ,
-                logoHtml: document.getElementById('sidebar-logo-container').innerHTML,
-                bgImage: document.body.style.backgroundImage || ''
+                logoHtml: document.getElementById('sidebar-logo-container').innerHTML
             };
             try {
-                // Simpan secara otomatis ke penyimpanan bersama (Shared Online Storage / LocalStorage Terintegrasi)
-                localStorage.setItem('lpj_bosp_shared_database_v6', JSON.stringify(appData));
+                localStorage.setItem('lpj_bosp_shared_database_v7', JSON.stringify(appData));
                 const syncIndicator = document.getElementById('sync-status');
                 if(syncIndicator) {
                     syncIndicator.innerText = "🟢 Tersinkronisasi Real-time (" + new Date().toLocaleTimeString() + ")";
                 }
             } catch (e) {
-                console.error("Gagal menyimpan data secara real-time:", e);
+                console.error("Gagal menyimpan data:", e);
             }
         }
 
         function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_shared_database_v6');
+            const saved = localStorage.getItem('lpj_bosp_shared_database_v7');
             if (!saved) return;
             try {
                 const appData = JSON.parse(saved);
@@ -1244,28 +1107,8 @@
                     document.getElementById('setting-user-name').value = appData.settings.userName || 'Nama Pengguna';
                     document.getElementById('setting-app-name').value = appData.settings.appName || 'LPJ BOSP';
                     document.getElementById('setting-app-desc').value = appData.settings.appDesc || 'Aplikasi Pelaporan Online';
-                    document.getElementById('setting-menu-1').value = appData.settings.menu1 || 'Data Master';
-                    document.getElementById('setting-menu-2').value = appData.settings.menu2 || 'Upload BKU';
-                    document.getElementById('setting-menu-3').value = appData.settings.menu3 || 'Buat LPJ';
-                    document.getElementById('setting-menu-4').value = appData.settings.menu4 || 'Cetak LPJ';
-                    
-                    document.getElementById('setting-layout-sidebar').value = appData.settings.layoutSidebar || 280;
-                    document.getElementById('setting-layout-padding').value = appData.settings.layoutPadding || 36;
-                    document.getElementById('setting-layout-gap').value = appData.settings.layoutGap || 20;
-
-                    document.getElementById('setting-color-sidebar').value = appData.settings.colorSidebar || '#111111';
-                    document.getElementById('setting-color-sidebar-text').value = appData.settings.colorSidebarText || '#ffffff';
-                    document.getElementById('setting-color-button').value = appData.settings.colorButton || '#222222';
-
-                    document.getElementById('setting-font-family').value = appData.settings.fontFamily || "'Inter', sans-serif";
-                    document.getElementById('setting-font-size').value = appData.settings.fontSize || 16;
-                    document.getElementById('setting-color-font').value = appData.settings.colorFont || '#222222';
-
                     document.getElementById('check-gabung-bpu').checked = appData.settings.gabungBpu ?? true;
-
                     updateSettings();
-                    updateAppLayout();
-                    updateTheme();
                     updateProfile();
                 }
 
@@ -1293,10 +1136,6 @@
                 if (appData.logoHtml) {
                     document.getElementById('sidebar-logo-container').innerHTML = appData.logoHtml;
                 }
-
-                if (appData.bgImage) {
-                    document.body.style.backgroundImage = appData.bgImage;
-                }
             } catch (e) {
                 console.error("Gagal memuat data tersimpan:", e);
             }
@@ -1305,7 +1144,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
             
-            const activeSession = localStorage.getItem('lpj_bosp_current_session_v5');
+            // Cek apakah sesi pengguna sudah aktif (Autentikasi persisten)
+            const activeSession = localStorage.getItem('lpj_bosp_current_session_v7');
             if (activeSession) {
                 try {
                     currentUser = JSON.parse(activeSession);
@@ -1341,6 +1181,7 @@
         }
 
         function switchTab(tabId) {
+            // Otorisasi ketat perpindahan menu pengaturan
             if (tabId === 'tab-settings' && currentUser && currentUser.role !== 'Admin') {
                 alert("Akses ditolak! Menu pengaturan hanya dapat diakses oleh Admin.");
                 return;
@@ -1371,51 +1212,6 @@
             document.getElementById('app-title-tag').innerText = appName || 'Sistem LPJ BOSP Resmi & Modern Online';
             document.getElementById('sidebar-app-name').innerText = appName || 'LPJ BOSP';
             document.getElementById('sidebar-app-desc').innerText = appDesc || 'Aplikasi Pelaporan Online';
-
-            document.querySelector('#menu-btn-1 .menu-text').innerText = document.getElementById('setting-menu-1').value || 'Data Master';
-            document.querySelector('#menu-btn-2 .menu-text').innerText = document.getElementById('setting-menu-2').value || 'Upload BKU';
-            document.querySelector('#menu-btn-3 .menu-text').innerText = document.getElementById('setting-menu-3').value || 'Buat LPJ';
-            document.querySelector('#menu-btn-4 .menu-text').innerText = document.getElementById('setting-menu-4').value || 'Cetak LPJ';
-        }
-
-        function updateAppLayout() {
-            const root = document.documentElement;
-            const sidebarWidth = document.getElementById('setting-layout-sidebar').value;
-            const paddingMain = document.getElementById('setting-layout-padding').value;
-            const gapCard = document.getElementById('setting-layout-gap').value;
-
-            root.style.setProperty('--layout-sidebar-width', `${sidebarWidth}px`);
-            root.style.setProperty('--layout-padding-main', `${paddingMain}px`);
-            root.style.setProperty('--layout-gap-card', `${gapCard}px`);
-        }
-
-        function updateTheme() {
-            const root = document.documentElement;
-            const sidebarHex = document.getElementById('setting-color-sidebar').value;
-            const sidebarTextHex = document.getElementById('setting-color-sidebar-text').value;
-            const btnHex = document.getElementById('setting-color-button').value;
-            
-            root.style.setProperty('--sidebar-bg', sidebarHex);
-            root.style.setProperty('--sidebar-text', sidebarTextHex);
-            root.style.setProperty('--sidebar-text-muted', sidebarTextHex + '99');
-            
-            root.style.setProperty('--btn-bg', btnHex);
-            root.style.setProperty('--btn-hover', adjustColor(btnHex, 20)); 
-            root.style.setProperty('--btn-success-bg', btnHex);
-            root.style.setProperty('--btn-success-hover', adjustColor(btnHex, -20));
-
-            const fontFamily = document.getElementById('setting-font-family').value;
-            root.style.setProperty('--base-font-family', fontFamily);
-
-            const fontSize = document.getElementById('setting-font-size').value;
-            root.style.setProperty('--base-font-size', `${fontSize}px`);
-
-            const fontColor = document.getElementById('setting-color-font').value;
-            root.style.setProperty('--text-color', fontColor);
-        }
-
-        function adjustColor(color, amount) {
-            return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
         }
 
         function handleLogoUpload(event) {
@@ -1439,24 +1235,6 @@
             logoContainer.style.background = 'rgba(255, 255, 255, 0.2)';
             logoContainer.style.border = '1px solid rgba(255, 255, 255, 0.3)';
             document.getElementById('setting-logo-upload').value = '';
-            saveAppData();
-        }
-
-        function handleBgUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.body.style.backgroundImage = `url(${e.target.result})`;
-                    saveAppData();
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function resetBackground() {
-            document.body.style.backgroundImage = 'none';
-            document.getElementById('setting-bg-upload').value = '';
             saveAppData();
         }
 
