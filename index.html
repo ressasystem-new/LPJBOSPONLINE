@@ -982,14 +982,14 @@
                 let textRes = await res.text();
                 let json = JSON.parse(textRes);
                 if (json && json.status === "success" && Array.isArray(json.users)) {
-                    listUsers = json.users;
+                    listUsers = json.users; // Menggunakan data murni dari Database Cloud Google Sheets
                     renderUsersTable();
                 }
             } catch (e) {
-                console.warn("Gagal mengambil data dari cloud (menggunakan data lokal):", e);
+                console.error("Gagal mengambil data dari cloud:", e);
             }
         }
-
+        
         async function addUserToCloud(newUserObj) {
             if (!CLOUD_API_URL || CLOUD_API_URL.includes("ISI_URL")) {
                 listUsers.push(newUserObj);
