@@ -17,7 +17,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
         :root {
-            --sidebar-bg: #1e293b;
+            --sidebar-bg: #111111;
             --sidebar-text: #ffffff;
             --sidebar-text-muted: #aaaaaa;
             
@@ -62,6 +62,63 @@
             background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
+        }
+
+        /* LOGIN SCREEN */
+        #login-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(17, 17, 17, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 400px;
+            padding: 36px 30px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-light);
+            text-align: center;
+        }
+        .login-logo {
+            width: 50px;
+            height: 50px;
+            background: var(--btn-bg);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 16px auto;
+        }
+        .login-box h2 { font-size: 1.25rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 6px; }
+        .login-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
+        .login-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .app-wrapper {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app-wrapper.active {
+            display: flex;
         }
 
         .sidebar { 
@@ -173,6 +230,7 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
+            gap: 12px;
         }
         .user-profile {
             position: relative;
@@ -394,436 +452,514 @@
 </head>
 <body>
 
-    <div class="topbar">
-        <div class="user-profile" onclick="toggleProfileMenu(event)">
-            <div class="avatar" id="display-avatar">N</div>
-            <span id="display-user-name">Nama Pengguna</span>
-            <span style="font-size: 0.7rem; color: var(--text-muted);">▼</span>
+    <!-- LOGIN SCREEN -->
+    <div id="login-container">
+        <div class="login-box">
+            <div class="login-logo">L</div>
+            <h2>Sistem LPJ BOSP</h2>
+            <p>Silakan masuk untuk mengakses aplikasi</p>
+            <div id="login-error-msg" class="login-error">Username atau password salah!</div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group" style="text-align: left;">
+                    <label>Username / Akun</label>
+                    <input type="text" id="login-user" placeholder="Masukkan username" required>
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center; margin-top: 6px;">Masuk Aplikasi</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div class="app-wrapper" id="app-wrapper">
+        <div class="topbar">
+            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;" onclick="handleLogout()">🚪 Keluar</button>
+            <div class="user-profile" onclick="toggleProfileMenu(event)">
+                <div class="avatar" id="display-avatar">N</div>
+                <span id="display-user-name">Nama Pengguna</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">▼</span>
+                
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        Masuk sebagai
+                        <strong id="dropdown-user-name">Nama Pengguna</strong>
+                        <span id="dropdown-user-role" style="font-size: 0.75rem; color: var(--btn-bg); font-weight: bold; margin-top: 2px; display: block;">Admin</span>
+                    </div>
+                    <a href="#" id="dropdown-settings-link" onclick="switchTab('tab-settings');">⚙️ Pengaturan</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon" id="sidebar-logo-container">L</div>
+                <div>
+                    <text id="sidebar-app-name">LPJ BOSP</text>
+                    <span id="sidebar-app-desc">Aplikasi Pembuatan LPJ Dana BOSP</span>
+                </div>
+            </div>
             
-            <div class="profile-dropdown" id="profile-dropdown">
-                <div class="profile-dropdown-header">
-                    Masuk sebagai
-                    <strong id="dropdown-user-name">Nama Pengguna</strong>
-                </div>
-                <a href="#" onclick="switchTab('tab-settings');">⚙️ Pengaturan</a>
-            </div>
-        </div>
-    </div>
+            <button class="menu-btn active" id="menu-btn-1" onclick="switchTab('tab-data')">
+                <span>📋</span> <span class="menu-text">Data Master</span>
+            </button>
+            <button class="menu-btn" id="menu-btn-2" onclick="switchTab('tab-upload')">
+                <span>📄</span> <span class="menu-text">Upload BKU</span>
+            </button>
+            <button class="menu-btn" id="menu-btn-3" onclick="switchTab('tab-lpj-form')">
+                <span>✍️</span> <span class="menu-text">Buat LPJ</span>
+            </button>
+            <button class="menu-btn" id="menu-btn-4" onclick="switchTab('tab-lpj-print')">
+                <span>🖨️</span> <span class="menu-text">Cetak LPJ</span>
+            </button>
+            <button class="menu-btn" id="menu-btn-5" onclick="switchTab('tab-settings')" id="sidebar-settings-btn">
+                <span>⚙️</span> <span class="menu-text">Pengaturan</span>
+            </button>
 
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <div class="sidebar-brand-icon" id="sidebar-logo-container">L</div>
-            <div>
-                <text id="sidebar-app-name">LPJ BOSP</text>
-                <span id="sidebar-app-desc">Aplikasi Pembuatan LPJ Dana BOSP</span>
-            </div>
-        </div>
-        
-        <button class="menu-btn active" id="menu-btn-1" onclick="switchTab('tab-data')">
-            <span>📋</span> <span class="menu-text">Data Master</span>
-        </button>
-        <button class="menu-btn" id="menu-btn-2" onclick="switchTab('tab-upload')">
-            <span>📄</span> <span class="menu-text">Upload BKU</span>
-        </button>
-        <button class="menu-btn" id="menu-btn-3" onclick="switchTab('tab-lpj-form')">
-            <span>✍️</span> <span class="menu-text">Buat LPJ</span>
-        </button>
-        <button class="menu-btn" id="menu-btn-4" onclick="switchTab('tab-lpj-print')">
-            <span>🖨️</span> <span class="menu-text">Cetak LPJ</span>
-        </button>
-
-        <div class="sidebar-footer-info">
-            <div class="app-ver">Versi 0.8-Online</div>
-            <div>© 2026 Dinas Pendidikan dan Kebudayaan Kota Manado</div>
-        </div>
-    </div>
-
-    <div class="main-content">
-
-        <div id="tab-data" class="tab-content active">
-            <div class="card">
-                <h3>Data Satuan Pendidikan</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>NPSN</label>
-                        <input type="text" id="npsn" placeholder="Contoh: 40101234" oninput="saveAppData()">
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Satuan Pendidikan</label>
-                        <input type="text" id="nama_sekolah" placeholder="Contoh: SD NEGERI MANADO" oninput="saveAppData()">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nama Kepala Sekolah</label>
-                        <input type="text" id="nama_ks" placeholder="Nama lengkap beserta gelar" oninput="saveAppData()">
-                    </div>
-                    <div class="form-group">
-                        <label>NIP/NIK Kepala Sekolah</label>
-                        <input type="text" id="nip_ks" placeholder="NIP/NIK Kepala Sekolah" oninput="saveAppData()">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nama Bendahara</label>
-                        <input type="text" id="nama_bendahara" placeholder="Nama lengkap beserta gelar" oninput="saveAppData()">
-                    </div>
-                    <div class="form-group">
-                        <label>NIP/NIK Bendahara</label>
-                        <input type="text" id="nip_bendahara" placeholder="NIP/NIK Bendahara" oninput="saveAppData()">
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="btn btn-success" onclick="simpanDataSekolah()">💾 Simpan Data Satuan Pendidikan</button>
-                </div>
-                <div id="status-simpan-sekolah" class="status-alert">✅ Data Satuan Pendidikan berhasil disimpan!</div>
-            </div>
-
-            <div class="card">
-                <h3>Penyedia / Toko Mitra</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nama PT / Nama Toko</label>
-                        <input type="text" id="toko_nama" placeholder="Contoh: Toko Buku & ATK Mandiri">
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Pemilik / Penanggung Jawab</label>
-                        <input type="text" id="toko_pemilik" placeholder="Contoh: Budi Santoso">
-                    </div>
-                </div>
-                <button class="btn" onclick="tambahPenyedia()">+ Tambahkan Penyedia</button>
-
-                <div class="table-container" style="margin-top: 18px;">
-                    <table id="tabel-penyedia">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">No</th>
-                                <th>Nama PT / Toko</th>
-                                <th>Nama Pemilik</th>
-                                <th style="width: 100px; text-align: center;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Penerima</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nama Penerima</label>
-                        <input type="text" id="penerima_nama" placeholder="Contoh: Ahmad Yani, S.Pd. / Personil Lapangan">
-                    </div>
-                </div>
-                <button class="btn" onclick="tambahPenerima()">+ Tambahkan Penerima</button>
-
-                <div class="table-container" style="margin-top: 18px;">
-                    <table id="tabel-penerima">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">No</th>
-                                <th>Nama Penerima</th>
-                                <th style="width: 100px; text-align: center;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            <div class="sidebar-footer-info">
+                <div class="app-ver">Versi 0.8-Online</div>
+                <div>© 2026 Dinas Pendidikan dan Kebudayaan Kota Manado</div>
             </div>
         </div>
 
-        <div id="tab-upload" class="tab-content">
-            <div class="card">
-                <h3>Upload Dokumen BKU (PDF)</h3>
-                <div class="form-group">
-                    <label>Pilih File PDF Buku Kas Umum (BKU):</label>
-                    <input type="file" id="pdf-file" accept="application/pdf">
-                </div>
-                <button class="btn btn-success" onclick="prosesPDF()">⚡ Proses & Ekstrak Data BKU</button>
-                <div id="status-pdf" style="margin-top: 12px; font-weight: 600; font-size: 0.88rem; color: var(--text-color);"></div>
-            </div>
+        <div class="main-content">
 
-            <div class="card">
-                <h3>Hasil Ekstraksi Tabel BKU</h3>
-                <div class="table-container" style="max-height: 420px;">
-                    <table id="tabel-bku">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Kode Kegiatan</th>
-                                <th>Kode Rekening</th>
-                                <th>No. Bukti</th>
-                                <th>Uraian</th>
-                                <th>Penerimaan</th>
-                                <th>Pengeluaran</th>
-                                <th>Saldo</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-lpj-form" class="tab-content">
-            <div class="card">
-                <h3>Form Pembuatan LPJ</h3>
-                
-                <div class="form-group" style="background: var(--bg-light); padding: 12px 14px; border-radius: 6px; border: 1px solid var(--border-light);">
-                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; color: var(--text-color); margin-bottom: 0;">
-                        <input type="checkbox" id="check-gabung-bpu" checked onchange="populateNoBuktiSelect(); saveAppData();" style="width: 16px; height: 16px; cursor: pointer;">
-                        Gabungkan Uraian dan Pengeluaran (Opsional) BPU/BNU yang namanya sama <span style="font-weight: normal; font-size: 0.8rem; color: var(--text-muted);">(Contoh: BPU01 CRAYON, BPU01 KERTAS HVS F4)</span>
-                    </label>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>a. Pilih NO. BUKTI Transaksi (Dari BKU):</label>
-                        <select id="select-bukti" onchange="autoFillForm()"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>b. Tanggal Transaksi:</label>
-                        <input type="text" id="lpj-tanggal" readonly style="background-color: var(--bg-light);">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>c. Klasifikasi Transaksi:</label>
-                        <select id="select-klasifikasi" onchange="saveAppData()">
-                            <option value="Jasa">1. Jasa</option>
-                            <option value="Rutin">2. Rutin</option>
-                            <option value="Barang" selected>3. Barang</option>
-                            <option value="Perjalanan Dinas">4. Perjalanan Dinas (SPPD)</option>
-                            <option value="Konsumsi">5. Konsumsi</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>d. Jumlah Pengeluaran (Rp):</label>
-                        <input type="text" id="lpj-jumlah" readonly style="background-color: var(--bg-light); font-weight: 700;">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>e. Uraian:</label>
-                    <textarea id="lpj-uraian" rows="2" placeholder="Masukkan atau sesuaikan uraian transaksi" oninput="saveAppData()"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>f. Pilih Penyedia / Toko Mitra: <span style="color: var(--text-muted); font-weight: normal;">(Boleh dikosongkan)</span></label>
-                        <select id="select-penyedia" onchange="saveAppData()"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>g. Pilih Nama Penerima Perorangan: <span style="color: var(--text-muted); font-weight: normal;">(Opsional)</span></label>
-                        <select id="select-penerima-form" onchange="saveAppData()"></select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Upload Lembar Nota / Struk Asli: <span style="color: var(--text-muted); font-weight: normal;">(Opsional)</span></label>
-                        <input type="file" id="nota-file" accept="image/*">
-                    </div>
-                    <div class="form-group">
-                        <label>Upload Bukti Foto Fisik Barang/Jasa: <span style="color: var(--text-muted); font-weight: normal;">(Bisa >1 foto)</span></label>
-                        <input type="file" id="foto-files" accept="image/*" multiple>
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <button class="btn btn-outline" onclick="resetFormLPJ()">🔄 Bersihkan Form</button>
-                    <button class="btn btn-success" onclick="tambahKeDaftarLPJ()">+ Simpan Transaksi ke Daftar LPJ</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Daftar Transaksi LPJ Siap Cetak</h3>
-                <div class="table-container">
-                    <table id="tabel-daftar-lpj">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px;">No</th>
-                                <th>No. Bukti</th>
-                                <th>Klasifikasi</th>
-                                <th>Tanggal</th>
-                                <th>Uraian</th>
-                                <th>Jumlah (Rp)</th>
-                                <th>Penyedia / Penerima</th>
-                                <th>Foto</th>
-                                <th style="width: 80px; text-align: center;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-lpj-print" class="tab-content">
-            <div class="card">
-                <h3>Pilih Transaksi yang Akan di-LPJ-kan</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                    Pilih salah satu transaksi dari daftar pembuatan LPJ di bawah untuk mencetak atau melihat pratinjau dokumen resmi.
-                </p>
-
-                <div class="table-container">
-                    <table id="tabel-cetak-lpj">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px;">Pilih</th>
-                                <th>No. Bukti</th>
-                                <th>Klasifikasi</th>
-                                <th>Tanggal</th>
-                                <th>Uraian</th>
-                                <th>Jumlah (Rp)</th>
-                                <th>Penyedia / Penerima</th>
-                                <th style="text-align: center;">Aksi Cetak Dokumen LPJ</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-settings" class="tab-content">
-            <div class="card">
-                <h3>👤 Profil Pengguna</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nama Pengguna</label>
-                        <input type="text" id="setting-user-name" value="Nama Pengguna" placeholder="Masukkan Nama Anda" oninput="updateProfile(); saveAppData();">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>⚙️ Pengaturan Aplikasi</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nama Aplikasi (Title Bar & Sidebar)</label>
-                        <input type="text" id="setting-app-name" value="LPJ BOSP" oninput="updateSettings(); saveAppData();">
-                    </div>
-                    <div class="form-group">
-                        <label>Deskripsi Aplikasi (Sidebar)</label>
-                        <input type="text" id="setting-app-desc" value="Aplikasi Pelaporan Online" oninput="updateSettings(); saveAppData();">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Upload Logo (Menggantikan Ikon 'L')</label>
-                    <input type="file" id="setting-logo-upload" accept="image/*" onchange="handleLogoUpload(event)">
-                    <button class="btn btn-outline" style="margin-top: 8px; font-size: 0.75rem;" onclick="resetLogo()">Reset Logo</button>
-                </div>
-
-                <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 24px 0;">
-
-                <h4>Ganti Nama Menu Sidebar</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Menu 1</label>
-                        <input type="text" id="setting-menu-1" value="Data Master" oninput="updateSettings(); saveAppData();">
-                    </div>
-                    <div class="form-group">
-                        <label>Menu 2</label>
-                        <input type="text" id="setting-menu-2" value="Upload BKU" oninput="updateSettings(); saveAppData();">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Menu 3</label>
-                        <input type="text" id="setting-menu-3" value="Buat LPJ" oninput="updateSettings(); saveAppData();">
-                    </div>
-                    <div class="form-group">
-                        <label>Menu 4</label>
-                        <input type="text" id="setting-menu-4" value="Cetak LPJ" oninput="updateSettings(); saveAppData();">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>📐 Atur Layout Tampilan Aplikasi (Jarak & Tata Letak)</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Lebar Sidebar (px)</label>
-                        <input type="number" id="setting-layout-sidebar" value="280" min="200" max="380" oninput="updateAppLayout(); saveAppData();">
-                    </div>
-                    <div class="form-group">
-                        <label>Padding Ruang Utama (px)</label>
-                        <input type="number" id="setting-layout-padding" value="36" min="16" max="64" oninput="updateAppLayout(); saveAppData();">
-                    </div>
-                    <div class="form-group">
-                        <label>Jarak Antarkartu / Konten (px)</label>
-                        <input type="number" id="setting-layout-gap" value="20" min="10" max="40" oninput="updateAppLayout(); saveAppData();">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>🎨 Personalisasi Tema & Font</h3>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Warna Latar Sidebar</label>
-                        <div class="color-picker-container">
-                            <input type="color" id="setting-color-sidebar" value="#111111" oninput="updateTheme(); saveAppData();">
-                            <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Sidebar</span>
+            <div id="tab-data" class="tab-content active">
+                <div class="card">
+                    <h3>Data Satuan Pendidikan</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>NPSN</label>
+                            <input type="text" id="npsn" placeholder="Contoh: 40101234" oninput="saveAppData()">
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Satuan Pendidikan</label>
+                            <input type="text" id="nama_sekolah" placeholder="Contoh: SD NEGERI MANADO" oninput="saveAppData()">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Warna Huruf Sidebar</label>
-                        <div class="color-picker-container">
-                            <input type="color" id="setting-color-sidebar-text" value="#ffffff" oninput="updateTheme(); saveAppData();">
-                            <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Huruf Menu</span>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nama Kepala Sekolah</label>
+                            <input type="text" id="nama_ks" placeholder="Nama lengkap beserta gelar" oninput="saveAppData()">
+                        </div>
+                        <div class="form-group">
+                            <label>NIP/NIK Kepala Sekolah</label>
+                            <input type="text" id="nip_ks" placeholder="NIP/NIK Kepala Sekolah" oninput="saveAppData()">
                         </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nama Bendahara</label>
+                            <input type="text" id="nama_bendahara" placeholder="Nama lengkap beserta gelar" oninput="saveAppData()">
+                        </div>
+                        <div class="form-group">
+                            <label>NIP/NIK Bendahara</label>
+                            <input type="text" id="nip_bendahara" placeholder="NIP/NIK Bendahara" oninput="saveAppData()">
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <button class="btn btn-success" onclick="simpanDataSekolah()">💾 Simpan Data Satuan Pendidikan</button>
+                    </div>
+                    <div id="status-simpan-sekolah" class="status-alert">✅ Data Satuan Pendidikan berhasil disimpan!</div>
+                </div>
+
+                <div class="card">
+                    <h3>Penyedia / Toko Mitra</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nama PT / Nama Toko</label>
+                            <input type="text" id="toko_nama" placeholder="Contoh: Toko Buku & ATK Mandiri">
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Pemilik / Penanggung Jawab</label>
+                            <input type="text" id="toko_pemilik" placeholder="Contoh: Budi Santoso">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="tambahPenyedia()">+ Tambahkan Penyedia</button>
+
+                    <div class="table-container" style="margin-top: 18px;">
+                        <table id="tabel-penyedia">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">No</th>
+                                    <th>Nama PT / Toko</th>
+                                    <th>Nama Pemilik</th>
+                                    <th style="width: 100px; text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Penerima</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nama Penerima</label>
+                            <input type="text" id="penerima_nama" placeholder="Contoh: Ahmad Yani, S.Pd. / Personil Lapangan">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="tambahPenerima()">+ Tambahkan Penerima</button>
+
+                    <div class="table-container" style="margin-top: 18px;">
+                        <table id="tabel-penerima">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">No</th>
+                                    <th>Nama Penerima</th>
+                                    <th style="width: 100px; text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-upload" class="tab-content">
+                <div class="card">
+                    <h3>Upload Dokumen BKU (PDF)</h3>
                     <div class="form-group">
-                        <label>Warna Utama Tombol</label>
-                        <div class="color-picker-container">
-                            <input type="color" id="setting-color-button" value="#222222" oninput="updateTheme(); saveAppData();">
-                            <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Tombol</span>
+                        <label>Pilih File PDF Buku Kas Umum (BKU):</label>
+                        <input type="file" id="pdf-file" accept="application/pdf">
+                    </div>
+                    <button class="btn btn-success" onclick="prosesPDF()">⚡ Proses & Ekstrak Data BKU</button>
+                    <div id="status-pdf" style="margin-top: 12px; font-weight: 600; font-size: 0.88rem; color: var(--text-color);"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Hasil Ekstraksi Tabel BKU</h3>
+                    <div class="table-container" style="max-height: 420px;">
+                        <table id="tabel-bku">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Kode Kegiatan</th>
+                                    <th>Kode Rekening</th>
+                                    <th>No. Bukti</th>
+                                    <th>Uraian</th>
+                                    <th>Penerimaan</th>
+                                    <th>Pengeluaran</th>
+                                    <th>Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-lpj-form" class="tab-content">
+                <div class="card">
+                    <h3>Form Pembuatan LPJ</h3>
+                    
+                    <div class="form-group" style="background: var(--bg-light); padding: 12px 14px; border-radius: 6px; border: 1px solid var(--border-light);">
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; color: var(--text-color); margin-bottom: 0;">
+                            <input type="checkbox" id="check-gabung-bpu" checked onchange="populateNoBuktiSelect(); saveAppData();" style="width: 16px; height: 16px; cursor: pointer;">
+                            Gabungkan Uraian dan Pengeluaran (Opsional) BPU/BNU yang namanya sama <span style="font-weight: normal; font-size: 0.8rem; color: var(--text-muted);">(Contoh: BPU01 CRAYON, BPU01 KERTAS HVS F4)</span>
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>a. Pilih NO. BUKTI Transaksi (Dari BKU):</label>
+                            <select id="select-bukti" onchange="autoFillForm()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>b. Tanggal Transaksi:</label>
+                            <input type="text" id="lpj-tanggal" readonly style="background-color: var(--bg-light);">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>c. Klasifikasi Transaksi:</label>
+                            <select id="select-klasifikasi" onchange="saveAppData()">
+                                <option value="Jasa">1. Jasa</option>
+                                <option value="Rutin">2. Rutin</option>
+                                <option value="Barang" selected>3. Barang</option>
+                                <option value="Perjalanan Dinas">4. Perjalanan Dinas (SPPD)</option>
+                                <option value="Konsumsi">5. Konsumsi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>d. Jumlah Pengeluaran (Rp):</label>
+                            <input type="text" id="lpj-jumlah" readonly style="background-color: var(--bg-light); font-weight: 700;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>e. Uraian:</label>
+                        <textarea id="lpj-uraian" rows="2" placeholder="Masukkan atau sesuaikan uraian transaksi" oninput="saveAppData()"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>f. Pilih Penyedia / Toko Mitra: <span style="color: var(--text-muted); font-weight: normal;">(Boleh dikosongkan)</span></label>
+                            <select id="select-penyedia" onchange="saveAppData()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>g. Pilih Nama Penerima Perorangan: <span style="color: var(--text-muted); font-weight: normal;">(Opsional)</span></label>
+                            <select id="select-penerima-form" onchange="saveAppData()"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Upload Lembar Nota / Struk Asli: <span style="color: var(--text-muted); font-weight: normal;">(Opsional)</span></label>
+                            <input type="file" id="nota-file" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <label>Upload Bukti Foto Fisik Barang/Jasa: <span style="color: var(--text-muted); font-weight: normal;">(Bisa >1 foto)</span></label>
+                            <input type="file" id="foto-files" accept="image/*" multiple>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                        <button class="btn btn-outline" onclick="resetFormLPJ()">🔄 Bersihkan Form</button>
+                        <button class="btn btn-success" onclick="tambahKeDaftarLPJ()">+ Simpan Transaksi ke Daftar LPJ</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Daftar Transaksi LPJ Siap Cetak</h3>
+                    <div class="table-container">
+                        <table id="tabel-daftar-lpj">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">No</th>
+                                    <th>No. Bukti</th>
+                                    <th>Klasifikasi</th>
+                                    <th>Tanggal</th>
+                                    <th>Uraian</th>
+                                    <th>Jumlah (Rp)</th>
+                                    <th>Penyedia / Penerima</th>
+                                    <th>Foto</th>
+                                    <th style="width: 80px; text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-lpj-print" class="tab-content">
+                <div class="card">
+                    <h3>Pilih Transaksi yang Akan di-LPJ-kan</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                        Pilih salah satu transaksi dari daftar pembuatan LPJ di bawah untuk mencetak atau melihat pratinjau dokumen resmi.
+                    </p>
+
+                    <div class="table-container">
+                        <table id="tabel-cetak-lpj">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">Pilih</th>
+                                    <th>No. Bukti</th>
+                                    <th>Klasifikasi</th>
+                                    <th>Tanggal</th>
+                                    <th>Uraian</th>
+                                    <th>Jumlah (Rp)</th>
+                                    <th>Penyedia / Penerima</th>
+                                    <th style="text-align: center;">Aksi Cetak Dokumen LPJ</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-settings" class="tab-content">
+                <div class="card" id="admin-management-card">
+                    <h3>👥 Manajemen Akun & Pengguna (Admin Only)</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4>Ubah Kredensial Admin Utama</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Username Admin</label>
+                                <input type="text" id="setting-admin-username" value="admin">
+                            </div>
+                            <div class="form-group">
+                                <label>Password Baru Admin</label>
+                                <input type="password" id="setting-admin-password" placeholder="Kosongkan jika tidak diubah">
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="updateAdminCredentials()">💾 Simpan Kredensial Admin</button>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 20px 0;">
+
+                    <div>
+                        <h4>Tambah Akun Pengguna Baru</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Username Pengguna</label>
+                                <input type="text" id="new-user-name" placeholder="Contoh: user_biasa">
+                            </div>
+                            <div class="form-group">
+                                <label>Password Pengguna</label>
+                                <input type="password" id="new-user-pass" placeholder="Password akun">
+                            </div>
+                        </div>
+                        <button class="btn" onclick="tambahAkunPengguna()">+ Tambah Akun Pengguna</button>
+
+                        <div class="table-container" style="margin-top: 14px;">
+                            <table id="tabel-list-users">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Peran (Role)</th>
+                                        <th style="text-align: center; width: 120px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <h4 style="margin-top: 16px; margin-bottom: 16px;">Fitur Edit Font</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Jenis Font Global</label>
-                        <select id="setting-font-family" onchange="updateTheme(); saveAppData();">
-                            <option value="'Inter', sans-serif">Inter (Modern & Clean)</option>
-                            <option value="'Roboto', sans-serif">Roboto (Standar Android)</option>
-                            <option value="'Open Sans', sans-serif">Open Sans (Netral)</option>
-                            <option value="'Lato', sans-serif">Lato (Elegan)</option>
-                            <option value="'Poppins', sans-serif">Poppins (Bulat & Ramah)</option>
-                            <option value="system-ui, sans-serif">System Default</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Ukuran Font Dasar (px)</label>
-                        <input type="number" id="setting-font-size" value="16" min="12" max="24" oninput="updateTheme(); saveAppData();">
-                    </div>
-                    <div class="form-group">
-                        <label>Warna Font Teks</label>
-                        <div class="color-picker-container">
-                            <input type="color" id="setting-color-font" value="#222222" oninput="updateTheme(); saveAppData();">
-                            <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Teks</span>
+                <div class="card">
+                    <h3>👤 Profil Pengguna</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nama Pengguna</label>
+                            <input type="text" id="setting-user-name" value="Nama Pengguna" placeholder="Masukkan Nama Anda" oninput="updateProfile(); saveAppData();">
                         </div>
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-top: 16px;">
-                    <label>Upload Gambar Background (opsional)</label>
-                    <input type="file" id="setting-bg-upload" accept="image/*" onchange="handleBgUpload(event)">
-                    <div style="margin-top: 8px; display: flex; gap: 10px;">
-                        <button class="btn btn-outline" style="font-size: 0.75rem;" onclick="resetBackground()">Hapus Background</button>
+                <div class="card">
+                    <h3>⚙️ Pengaturan Aplikasi</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nama Aplikasi (Title Bar & Sidebar)</label>
+                            <input type="text" id="setting-app-name" value="LPJ BOSP" oninput="updateSettings(); saveAppData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Deskripsi Aplikasi (Sidebar)</label>
+                            <input type="text" id="setting-app-desc" value="Aplikasi Pelaporan Online" oninput="updateSettings(); saveAppData();">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Upload Logo (Menggantikan Ikon 'L')</label>
+                        <input type="file" id="setting-logo-upload" accept="image/*" onchange="handleLogoUpload(event)">
+                        <button class="btn btn-outline" style="margin-top: 8px; font-size: 0.75rem;" onclick="resetLogo()">Reset Logo</button>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 24px 0;">
+
+                    <h4>Ganti Nama Menu Sidebar</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Menu 1</label>
+                            <input type="text" id="setting-menu-1" value="Data Master" oninput="updateSettings(); saveAppData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Menu 2</label>
+                            <input type="text" id="setting-menu-2" value="Upload BKU" oninput="updateSettings(); saveAppData();">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Menu 3</label>
+                            <input type="text" id="setting-menu-3" value="Buat LPJ" oninput="updateSettings(); saveAppData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Menu 4</label>
+                            <input type="text" id="setting-menu-4" value="Cetak LPJ" oninput="updateSettings(); saveAppData();">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📐 Atur Layout Tampilan Aplikasi (Jarak & Tata Letak)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Lebar Sidebar (px)</label>
+                            <input type="number" id="setting-layout-sidebar" value="280" min="200" max="380" oninput="updateAppLayout(); saveAppData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Padding Ruang Utama (px)</label>
+                            <input type="number" id="setting-layout-padding" value="36" min="16" max="64" oninput="updateAppLayout(); saveAppData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Jarak Antarkartu / Konten (px)</label>
+                            <input type="number" id="setting-layout-gap" value="20" min="10" max="40" oninput="updateAppLayout(); saveAppData();">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🎨 Personalisasi Tema & Font</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Warna Latar Sidebar</label>
+                            <div class="color-picker-container">
+                                <input type="color" id="setting-color-sidebar" value="#111111" oninput="updateTheme(); saveAppData();">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Sidebar</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Warna Huruf Sidebar</label>
+                            <div class="color-picker-container">
+                                <input type="color" id="setting-color-sidebar-text" value="#ffffff" oninput="updateTheme(); saveAppData();">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Huruf Menu</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Warna Utama Tombol</label>
+                            <div class="color-picker-container">
+                                <input type="color" id="setting-color-button" value="#222222" oninput="updateTheme(); saveAppData();">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Tombol</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-top: 16px; margin-bottom: 16px;">Fitur Edit Font</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Jenis Font Global</label>
+                            <select id="setting-font-family" onchange="updateTheme(); saveAppData();">
+                                <option value="'Inter', sans-serif">Inter (Modern & Clean)</option>
+                                <option value="'Roboto', sans-serif">Roboto (Standar Android)</option>
+                                <option value="'Open Sans', sans-serif">Open Sans (Netral)</option>
+                                <option value="'Lato', sans-serif">Lato (Elegan)</option>
+                                <option value="'Poppins', sans-serif">Poppins (Bulat & Ramah)</option>
+                                <option value="system-ui, sans-serif">System Default</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ukuran Font Dasar (px)</label>
+                            <input type="number" id="setting-font-size" value="16" min="12" max="24" oninput="updateTheme(); saveAppData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Warna Font Teks</label>
+                            <div class="color-picker-container">
+                                <input type="color" id="setting-color-font" value="#222222" oninput="updateTheme(); saveAppData();">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">Pilih Warna Teks</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label>Upload Gambar Background (opsional)</label>
+                        <input type="file" id="setting-bg-upload" accept="image/*" onchange="handleBgUpload(event)">
+                        <div style="margin-top: 8px; display: flex; gap: 10px;">
+                            <button class="btn btn-outline" style="font-size: 0.75rem;" onclick="resetBackground()">Hapus Background</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 
     <div id="preview-modal" class="modal">
@@ -841,7 +977,7 @@
     <div id="success-modal" class="modal">
         <div class="modal-content" style="max-width: 400px; height: auto; padding: 28px 24px; text-align: center; align-self: center; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);">
             <div style="font-size: 3.5rem; line-height: 1; margin-bottom: 14px;">👍</div>
-            <h3 style="justify-content: center; margin-bottom: 10px; font-size: 1.15rem; color: var(--btn-bg);">Berhasil Ditambahkan!</h3>
+            <h3 style="justify-content: center; margin-bottom: 10px; font-size: 1.15rem; color: var(--btn-bg);">Berhasil!</h3>
             <p id="success-modal-msg" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 22px; line-height: 1.4;"></p>
             <button class="btn btn-success" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">OK / Mengerti</button>
         </div>
@@ -856,6 +992,17 @@
         let daftarLPJ = [];
         let processedBKUForForm = [];
 
+        // Data Akun Pengguna & Admin Default
+        let authData = {
+            adminUser: "admin",
+            adminPass: "Manado01",
+            users: [
+                { username: "admin", password: "Manado01", role: "Admin" }
+            ]
+        };
+
+        let currentUser = null;
+
         const checklistKlasifikasi = {
             "Jasa": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi", "SK Pengangkatan / Perjanjian Kerja Sama", "Daftar Hadir"],
             "Rutin": ["Kuitansi", "Bukti Transaksi"],
@@ -864,9 +1011,113 @@
             "Konsumsi": ["Kuitansi", "Bukti Transaksi", "Foto/Dokumentasi"]
         };
 
+        // --- SISTEM LOGIN & OTENTIKASI ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const uInput = document.getElementById('login-user').value.trim();
+            const pInput = document.getElementById('login-pass').value.trim();
+            const errDiv = document.getElementById('login-error-msg');
+
+            let found = authData.users.find(u => u.username === uInput && u.password === pInput);
+            if (found) {
+                currentUser = found;
+                errDiv.style.display = 'none';
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('app-wrapper').classList.add('active');
+                applyUserPermissions();
+                updateProfile();
+            } else {
+                errDiv.style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+            document.getElementById('app-wrapper').classList.remove('active');
+            document.getElementById('login-container').style.display = 'flex';
+        }
+
+        function applyUserPermissions() {
+            const settingsBtn = document.getElementById('menu-btn-5');
+            const adminCard = document.getElementById('admin-management-card');
+            const roleLabel = document.getElementById('dropdown-user-role');
+
+            if (currentUser && currentUser.role === 'Admin') {
+                if(settingsBtn) settingsBtn.style.display = 'flex';
+                if(adminCard) adminCard.style.display = 'block';
+                if(roleLabel) roleLabel.innerText = 'Admin (Akses Penuh)';
+            } else {
+                if(settingsBtn) settingsBtn.style.display = 'none';
+                if(adminCard) adminCard.style.display = 'none';
+                if(roleLabel) roleLabel.innerText = 'Pengguna / User';
+                // Jika sedang di tab settings saat login sebagai user, alihkan ke tab data
+                if(document.getElementById('tab-settings').classList.contains('active')) {
+                    switchTab('tab-data');
+                }
+            }
+            renderUserTable();
+        }
+
+        function updateAdminCredentials() {
+            const newU = document.getElementById('setting-admin-username').value.trim();
+            const newP = document.getElementById('setting-admin-password').value.trim();
+
+            if (!newU) { alert("Username admin tidak boleh kosong!"); return; }
+
+            authData.adminUser = newU;
+            let adminObj = authData.users.find(u => u.role === 'Admin');
+            if (adminObj) {
+                adminObj.username = newU;
+                if (newP) adminObj.password = newP;
+            }
+            document.getElementById('setting-admin-password').value = '';
+            saveAppData();
+            showSuccessModal("Kredensial Admin berhasil diperbarui!");
+        }
+
+        function tambahAkunPengguna() {
+            const uname = document.getElementById('new-user-name').value.trim();
+            const upass = document.getElementById('new-user-pass').value.trim();
+
+            if (!uname || !upass) { alert("Username dan Password pengguna wajib diisi!"); return; }
+            if (authData.users.some(u => u.username === uname)) { alert("Username sudah terdaftar!"); return; }
+
+            authData.users.push({ username: uname, password: upass, role: 'Pengguna' });
+            document.getElementById('new-user-name').value = '';
+            document.getElementById('new-user-pass').value = '';
+            saveAppData();
+            renderUserTable();
+            showSuccessModal(`Akun pengguna ${uname} berhasil ditambahkan!`);
+        }
+
+        function renderUserTable() {
+            const tbody = document.querySelector('#tabel-list-users tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            authData.users.forEach((usr, idx) => {
+                tbody.innerHTML += `<tr>
+                    <td><b>${usr.username}</b></td>
+                    <td><span class="bukti-badge">${usr.role}</span></td>
+                    <td style="text-align:center;">
+                        ${usr.role !== 'Admin' ? `<button onclick="hapusUser(${idx})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-weight:600;">Hapus</button>` : '<span style="color:var(--text-muted); font-size:0.75rem;">Utama</span>'}
+                    </td>
+                </tr>`;
+            });
+        }
+
+        function hapusUser(idx) {
+            authData.users.splice(idx, 1);
+            saveAppData();
+            renderUserTable();
+        }
+
         // --- SISTEM PENYIMPANAN LOCALSTORAGE ---
         function saveAppData() {
             const appData = {
+                authData: authData,
                 sekolah: {
                     npsn: document.getElementById('npsn').value,
                     nama_sekolah: document.getElementById('nama_sekolah').value,
@@ -902,18 +1153,22 @@
                 bgImage: document.body.style.backgroundImage || ''
             };
             try {
-                localStorage.setItem('lpj_bosp_online_data_v2', JSON.stringify(appData));
+                localStorage.setItem('lpj_bosp_online_data_v3', JSON.stringify(appData));
             } catch (e) {
-                console.error("Gagal menyimpan ke localStorage (kemungkinan ukuran foto terlalu besar):", e);
+                console.error("Gagal menyimpan ke localStorage:", e);
             }
         }
 
         function loadAppData() {
-            const saved = localStorage.getItem('lpj_bosp_online_data_v2');
+            const saved = localStorage.getItem('lpj_bosp_online_data_v3');
             if (!saved) return;
             try {
                 const appData = JSON.parse(saved);
                 
+                if (appData.authData) {
+                    authData = appData.authData;
+                }
+
                 if (appData.sekolah) {
                     document.getElementById('npsn').value = appData.sekolah.npsn || '';
                     document.getElementById('nama_sekolah').value = appData.sekolah.nama_sekolah || '';
@@ -987,6 +1242,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
+            renderUserTable();
         });
 
         function toggleProfileMenu(e) {
@@ -1003,13 +1259,18 @@
         });
 
         function updateProfile() {
-            const userName = document.getElementById('setting-user-name').value || 'Nama Pengguna';
+            const userName = document.getElementById('setting-user-name').value || (currentUser ? currentUser.username : 'Nama Pengguna');
             document.getElementById('display-user-name').innerText = userName;
             document.getElementById('dropdown-user-name').innerText = userName;
             document.getElementById('display-avatar').innerText = userName.charAt(0).toUpperCase();
         }
 
         function switchTab(tabId) {
+            if (tabId === 'tab-settings' && currentUser && currentUser.role !== 'Admin') {
+                alert("Akses ditolak! Menu pengaturan hanya dapat diakses oleh Admin.");
+                return;
+            }
+
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
@@ -1025,6 +1286,7 @@
                 btns[3].classList.add('active');
                 renderTabelCetakLPJ();
             }
+            if(tabId === 'tab-settings' && btns[4]) btns[4].classList.add('active');
         }
 
         function updateSettings() {
